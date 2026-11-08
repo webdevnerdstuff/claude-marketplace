@@ -1,0 +1,35 @@
+{
+	"name": "webdevnerdstuff",
+	"description": "All of WebDevNerdStuff's Claude Code mods in one marketplace: add it once, install any of them.",
+	"owner": {
+		"name": "WebDevNerdStuff & Bunnies... lots and lots of bunnies!",
+		"email": "webdevnerdstuff@gmail.com",
+		"url": "https://webdevnerdstuff.com"
+	},
+	"plugins": [
+		{
+			"name": "loadout",
+			"description": "Everything Claude Code has equipped, in one pane: your local, project, plugin and claude.ai account skills, and every enabled plugin. What each skill does, where it lives, whether it is off. /loadout opens it.",
+			"source": {
+				"source": "github",
+				"repo": "webdevnerdstuff/claude-loadout"
+			}
+		},
+		{
+			"name": "session-mover",
+			"description": "Move Claude desktop Code sessions between sidebar workspaces from a pane. /move-sessions opens it.",
+			"source": {
+				"source": "github",
+				"repo": "webdevnerdstuff/claude-session-mover"
+			}
+		},
+		{
+			"name": "skin-code",
+			"description": "Real syntax highlighting for code blocks in Claude Code replies: VS Code's grammars and themes through Shiki, following your skins skin or a theme you pick. /skin-code switches it.",
+			"source": {
+				"source": "github",
+				"repo": "webdevnerdstuff/claude-skin-code"
+			}
+		}
+	]
+}
