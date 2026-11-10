@@ -82,20 +82,49 @@ are no releases there. Tell the user up front that releases aren't supported on
 Bitbucket and that you'll run `gacppm` instead, then do exactly that. Don't run
 `release-version.sh` and don't push a tag.
 
-Everywhere else, **before step 1**, work out the tag, so nothing is committed if the release can't happen:
+Everywhere else, **before step 1**, always ask the user which version to release, so
+nothing is committed until the number is settled:
 
-```bash
-${CLAUDE_SKILL_DIR}/scripts/release-version.sh
-```
+1. Get the options:
 
-It reads `version` from `.claude-plugin/plugin.json`, `package.json` and `composer.json`
-and prints the tag, e.g. `v1.2.0` (the `v` follows the repo's existing tags).
+   ```bash
+   ${CLAUDE_SKILL_DIR}/scripts/release-version.sh
+   ```
 
-- If it fails because the files disagree or the tag already exists, stop before
-  committing and show its message: the version wasn't bumped (or was bumped in only
-  some files). Don't bump it yourself; the user decides the number.
-- If it fails because there's no version file, ask the user for the version, then
-  carry on with that tag.
+   It prints `current` (the latest release, or `0.0.0` when there are none), the
+   version files and the version in them (`.claude-plugin/plugin.json`, `package.json`,
+   `composer.json`), and the next `patch`, `minor` and `major` versions. If it fails
+   because the version files disagree, stop and show its message.
+
+2. Pick a suggestion from the changes being released (the diff and the conversation):
+   **major** for anything that breaks how people use it (removed or renamed commands,
+   options or files they rely on), **minor** for new features, **patch** for fixes and
+   small changes only. If the version files are already ahead of `current` (the user
+   bumped them by hand), suggest keeping that version instead.
+
+3. Ask with a question that has buttons (the AskUserQuestion tool where it exists):
+   one option each for patch, minor and major, labeled with the bump and the resulting
+   version (e.g. "Minor: 1.3.0"), plus "Keep 0.5.1" when the files are already ahead.
+   Put your suggestion first and mark it "(Recommended)", and say in a few words why.
+   The user can also type a different version.
+
+4. Check the chosen version isn't already released:
+
+   ```bash
+   ${CLAUDE_SKILL_DIR}/scripts/release-version.sh check <version>
+   ```
+
+   It prints the tag (e.g. `v1.3.0`; the `v` follows the repo's existing tags). If the
+   tag already exists, say so and ask again.
+
+5. If the version files don't already hold that version, write it into them, so it's
+   part of the commit:
+
+   ```bash
+   ${CLAUDE_SKILL_DIR}/scripts/release-version.sh set <version>
+   ```
+
+   With no version files it changes nothing, and the release is just the tag.
 
 After the merge and the local fast-forward, publish the release on the default branch:
 

@@ -96,7 +96,7 @@ Typing the shorthand as a plain message (`gacp`) works too.
 
 **Merging always waits for you.** Once CI passes, `/gacppm` shows the PR link, the CI result and its approvals, and asks you to click **Merge**. It won't offer to merge while a check is failing or still running, or while a required review is missing, and it never bypasses branch protection.
 
-**Releases** take their number from the `version` in `.claude-plugin/plugin.json`, `package.json` or `composer.json`, so bump it as part of your change: version `1.2.0` becomes release `v1.2.0`. If the files disagree, or that release already exists, `/gacppmr` stops before committing anything. With no version file, it asks you for the number.
+**Releases always ask first.** Before committing anything, `/gacppmr` asks whether this is a major, minor or patch release, showing the version each one gives (e.g. "Minor: 1.3.0") with its suggestion first. It writes the version you pick into `.claude-plugin/plugin.json`, `package.json` and `composer.json` (whichever exist) as part of the commit, and tags the release to match: `1.3.0` becomes `v1.3.0`. If you already bumped the files yourself, it offers to keep that version.
 
 #### Where PRs work
 

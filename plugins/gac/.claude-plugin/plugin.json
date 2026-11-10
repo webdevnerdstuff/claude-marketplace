@@ -1,6 +1,6 @@
 {
 	"name": "gac",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"description": "Git add and commit in one step, with shorthands that go further: /gacp pushes, /gacpp opens a PR, /gacppm merges it once CI passes and you confirm, /gacppmr also publishes a release. Works with GitHub, Bitbucket Cloud and self-hosted Forgejo/Gitea, and sources nvm so Husky hooks run. /gac runs it.",
 	"author": {
 		"name": "WebDevNerdStuff & Bunnies... lots and lots of bunnies!",
