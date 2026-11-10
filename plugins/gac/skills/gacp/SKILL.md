@@ -1,7 +1,7 @@
 ---
 name: gacp
 description: Git add, commit and push in one step. Use when the user types "/gacp" or "gacp". Shorthand for the gac skill with a push.
-allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/skills/gac/scripts/forge.sh *)
+allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/skills/gac/scripts/*)
 ---
 
 # gacp: commit and push
