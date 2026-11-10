@@ -3,16 +3,16 @@ name: gac
 description: >
   Git add and commit helper, with shorthands that go further. Use this skill
   whenever the user types "/gac" or "gac", or asks to stage and commit files.
-  The shorthands "gacp" (commit + push), "gacpp" (commit + push + open a PR)
-  and "gacppm" (commit + push + PR + merge) have their own skills that follow
-  this one. Sources nvm first when it is installed (NVM_DIR is
+  The shorthands "gacp" (commit + push), "gacpp" (commit + push + open a PR),
+  "gacppm" (commit + push + PR + merge) and "gacppmr" (all that + a release)
+  have their own skills that follow this one. Sources nvm first when it is installed (NVM_DIR is
   unset in the Bash tool shell) so Husky pre-commit hooks work correctly.
   Opens and merges PRs on GitHub (gh) and on self-hosted Forgejo/Gitea
   (bundled scripts/forge.sh, REST API). Accepts optional arguments: files to
   stage and a commit message. If not provided, checks git status and prompts
   interactively. Never includes the JIRA ticket in the commit message — Husky
   prepends it automatically from the branch name.
-allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/forge.sh *)
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/forge.sh *) Bash(${CLAUDE_SKILL_DIR}/scripts/release-version.sh)
 ---
 
 # Git Add & Commit (gac)
@@ -52,6 +52,32 @@ failure and reporting it:
 | `gacp` | commit, push (`git push -u origin <branch>`) |
 | `gacpp` | commit, push, open a PR into the repo's default branch |
 | `gacppm` | commit, push, open a PR, wait for CI to pass, merge it (a merge commit, deleting the branch), then fast-forward local main |
+| `gacppmr` | everything `gacppm` does, then tag the merge and publish a release (see **Release** below) |
+
+### Release (`gacppmr` only)
+
+**Before step 1**, work out the tag, so nothing is committed if the release can't happen:
+
+```bash
+${CLAUDE_SKILL_DIR}/scripts/release-version.sh
+```
+
+It reads `version` from `.claude-plugin/plugin.json`, `package.json` and `composer.json`
+and prints the tag, e.g. `v1.2.0` (the `v` follows the repo's existing tags).
+
+- If it fails because the files disagree or the tag already exists, stop before
+  committing and show its message: the version wasn't bumped (or was bumped in only
+  some files). Don't bump it yourself; the user decides the number.
+- If it fails because there's no version file, ask the user for the version, then
+  carry on with that tag.
+
+After the merge and the local fast-forward, publish the release on the default branch:
+
+- GitHub: `gh release create <tag> --target <default> --title "<tag>" --notes "<notes>"`
+- Forgejo / Gitea: `${CLAUDE_SKILL_DIR}/scripts/forge.sh release-create <tag> <default> "<tag>" "<notes>"`
+
+`<notes>` is the merged PR's title as a heading, then its summary. Then run
+`git fetch --tags` and report the release URL.
 
 ### Which forge (GitHub vs Forgejo/Gitea)
 

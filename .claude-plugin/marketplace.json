@@ -9,7 +9,7 @@
 	"plugins": [
 		{
 			"name": "gac",
-			"description": "Git add and commit in one step, with shorthands that push, open a PR and merge it. GitHub and self-hosted Forgejo/Gitea. /gac, /gacp, /gacpp, /gacppm.",
+			"description": "Git add and commit in one step, with shorthands that push, open a PR, merge it and publish a release. GitHub and self-hosted Forgejo/Gitea. /gac, /gacp, /gacpp, /gacppm, /gacppmr.",
 			"source": "./plugins/gac"
 		},
 		{

@@ -14,6 +14,8 @@
 #   pr-create <base> <title> [body]   open a PR from the current branch; prints "<number> <url>"
 #   pr-checks <number>        success | pending | failure | error | none  (none = no CI)
 #   pr-merge <number>         merge commit + delete the branch; prints "merged"
+#   release-create <tag> <target> <title> [body]
+#                             tag <target> (a branch or SHA) and publish a release; prints its URL
 set -euo pipefail
 
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/gac/hosts.json"
@@ -106,5 +108,10 @@ case "$cmd" in
     api POST "/repos/$SLUG/pulls/$n/merge" '{"Do":"merge","delete_branch_after_merge":true}' >/dev/null
     api GET "/repos/$SLUG/pulls/$n" | jq -r 'if .merged then "merged" else "not merged" end' ;;
 
-  *) sed -n '2,20p' "$0"; exit 2 ;;
+  release-create)
+    tag=${1:?tag}; target=${2:?target}; title=${3:?title}; body=${4:-}
+    api POST "/repos/$SLUG/releases" "$(jq -n --arg t "$tag" --arg c "$target" --arg n "$title" --arg b "$body" '{tag_name:$t, target_commitish:$c, name:$n, body:$b, draft:false, prerelease:false}')" \
+      | jq -r '.html_url' ;;
+
+  *) sed -n '2,18p' "$0"; exit 2 ;;
 esac
