@@ -1,0 +1,56 @@
+name: CI
+
+# Validates the marketplace and every plugin in plugins/, and syntax-checks the bundled shell
+# scripts, against the Claude Code the plugins are tested on and, as an early warning, the latest
+# build. Nothing here talks to the model or needs a secret.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check (claude ${{ matrix.claude }})
+    runs-on: ubuntu-latest
+    # The latest build may change the plugin format before the plugins catch up: it reports, it
+    # does not block.
+    continue-on-error: ${{ matrix.claude == 'latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        claude: ['2.1.287', latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Newer packages fetch a native binary in a postinstall step; run it again when it did not
+      # take, as the package's own error message says to.
+      - name: Install Claude Code
+        run: |
+          npm install -g @anthropic-ai/claude-code@${{ matrix.claude }}
+          claude --version || node "$(npm root -g)/@anthropic-ai/claude-code/install.cjs"
+          claude --version
+
+      - name: Validate the marketplace
+        run: claude plugin validate .
+
+      - name: Validate each plugin
+        run: |
+          for plugin in plugins/*/; do
+            echo "::group::$plugin"
+            claude plugin validate "$plugin"
+            echo "::endgroup::"
+          done
+
+      - name: Syntax-check the shell scripts
+        run: find plugins -name '*.sh' -print0 | xargs -0 -n 1 bash -n
