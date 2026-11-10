@@ -71,7 +71,7 @@ Each mod's own repo has its full docs.
 
 | Skill | What it does | Runs with |
 | --- | --- | --- |
-| [**gac**](plugins/gac/skills/gac/SKILL.md) | Git add and commit in one step, with shorthands that push, open a PR and merge it once CI passes. | `/gac` |
+| [**gac**](plugins/gac/skills/gac/SKILL.md) | Git add and commit in one step, with shorthands that push, open a PR and merge it once CI passes. | `/gac` `/gacp` `/gacpp` `/gacppm` |
 | [**handoff**](plugins/handoff/skills/handoff/SKILL.md) | A self-contained handoff summary of the session in one copyable block, so work picks up cleanly in a fresh session. For finished work, a short completion summary ready for Jira, Slack or an email. | `/handoff` |
 
 If you already have a command with the same name, use the long form instead: `/gac:gac`, `/handoff:handoff`.
@@ -84,12 +84,14 @@ If you already have a command with the same name, use the long form instead: `/g
 
 Add files and a message after the command, or leave them off and it works them out from `git status` and the diff: `/gac src/app.ts "fix header link"`. Each extra letter adds a step:
 
-| Typed | Does |
+| Command | Does |
 | --- | --- |
-| `gac` | Stage and commit |
-| `gacp` | …then push |
-| `gacpp` | …then open a PR into the default branch |
-| `gacppm` | …then wait for CI to pass, merge the PR and update your local default branch |
+| `/gac` | Stage and commit |
+| `/gacp` | …then push |
+| `/gacpp` | …then open a PR into the default branch |
+| `/gacppm` | …then wait for CI to pass, merge the PR and update your local default branch |
+
+Typing the shorthand as a plain message (`gacp`) works too.
 
 - **GitHub** PRs go through the [`gh`](https://cli.github.com) CLI.
 - **Forgejo and Gitea** PRs go through a bundled helper. The first time, it asks for your forge's URL and an API token, and keeps the token in the macOS Keychain. It needs macOS, `curl` and `jq`.

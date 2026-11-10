@@ -2,9 +2,10 @@
 name: gac
 description: >
   Git add and commit helper, with shorthands that go further. Use this skill
-  whenever the user types "/gac", "gac", "gacp" (commit + push), "gacpp"
-  (commit + push + open a PR) or "gacppm" (commit + push + PR + merge), or asks
-  to stage and commit files. Sources nvm first when it is installed (NVM_DIR is
+  whenever the user types "/gac" or "gac", or asks to stage and commit files.
+  The shorthands "gacp" (commit + push), "gacpp" (commit + push + open a PR)
+  and "gacppm" (commit + push + PR + merge) have their own skills that follow
+  this one. Sources nvm first when it is installed (NVM_DIR is
   unset in the Bash tool shell) so Husky pre-commit hooks work correctly.
   Opens and merges PRs on GitHub (gh) and on self-hosted Forgejo/Gitea
   (bundled scripts/forge.sh, REST API). Accepts optional arguments: files to
