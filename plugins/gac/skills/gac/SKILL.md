@@ -7,12 +7,13 @@ description: >
   "gacppm" (commit + push + PR + merge) and "gacppmr" (all that + a release)
   have their own skills that follow this one. Sources nvm first when it is installed (NVM_DIR is
   unset in the Bash tool shell) so Husky pre-commit hooks work correctly.
-  Opens and merges PRs on GitHub (gh) and on self-hosted Forgejo/Gitea
-  (bundled scripts/forge.sh, REST API). Accepts optional arguments: files to
-  stage and a commit message. If not provided, checks git status and prompts
-  interactively. Never includes the JIRA ticket in the commit message — Husky
-  prepends it automatically from the branch name.
-allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/forge.sh *) Bash(${CLAUDE_SKILL_DIR}/scripts/release-version.sh)
+  Opens and merges PRs on GitHub (gh), Bitbucket Cloud and self-hosted
+  Forgejo/Gitea (bundled scripts, REST APIs); a merge always waits for the
+  user to confirm it. Accepts optional arguments: files to stage and a commit
+  message. If not provided, checks git status and prompts interactively. Never
+  includes the JIRA ticket in the commit message — Husky prepends it
+  automatically from the branch name.
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/*)
 ---
 
 # Git Add & Commit (gac)
@@ -51,66 +52,126 @@ failure and reporting it:
 | `gac` | commit |
 | `gacp` | commit, push (`git push -u origin <branch>`) |
 | `gacpp` | commit, push, open a PR into the repo's default branch |
-| `gacppm` | commit, push, open a PR, wait for CI to pass, merge it (a merge commit, deleting the branch), then fast-forward local main |
-| `gacppmr` | everything `gacppm` does, then tag the merge and publish a release (see **Release** below) |
+| `gacppm` | commit, push, open a PR, wait for CI to pass, **ask the user to confirm the merge** (see **Merging** below), merge it (a merge commit, deleting the branch), then fast-forward local main |
+| `gacppmr` | everything `gacppm` does, then tag the merge and publish a release (see **Release** below). On Bitbucket, which has no releases, it runs as `gacppm` |
+
+### Merging (`gacppm` and `gacppmr`)
+
+The shorthand authorizes getting the PR ready, not the merge itself. Never merge
+without the user's click:
+
+1. Wait for CI (`pr-checks`, or `gh pr checks <number>` on GitHub). While it's
+   pending, re-check in the background, not in a tight loop. If anything failed,
+   stop and show it; don't offer to merge.
+2. Check reviews: on GitHub `gh pr view <number> --json reviewDecision,mergeStateStatus`;
+   on Bitbucket and Forgejo/Gitea `pr-approvals <number>`. If the host says a review
+   is required and it hasn't been approved (`REVIEW_REQUIRED`, `CHANGES_REQUESTED`,
+   or `mergeStateStatus` `BLOCKED`), stop: say who needs to approve it, give the PR
+   link, and don't offer to merge.
+3. Otherwise ask the user with a question that has buttons (the AskUserQuestion
+   tool where it exists): the PR link, the CI result (or "no CI"), the approvals,
+   then **Merge** / **Don't merge**. Merge only on **Merge**. On anything else,
+   leave the PR open, give its link and stop (no release either).
+4. If the merge itself is refused (branch protection, missing approval), show the
+   host's message and stop. Never retry with admin or bypass flags.
 
 ### Release (`gacppmr` only)
 
-**Before step 1**, work out the tag, so nothing is committed if the release can't happen:
+**On Bitbucket** (see **Which host** below), skip everything in this section: there
+are no releases there. Tell the user up front that releases aren't supported on
+Bitbucket and that you'll run `gacppm` instead, then do exactly that. Don't run
+`release-version.sh` and don't push a tag.
 
-```bash
-${CLAUDE_SKILL_DIR}/scripts/release-version.sh
-```
+Everywhere else, **before step 1**, always ask the user which version to release, so
+nothing is committed until the number is settled:
 
-It reads `version` from `.claude-plugin/plugin.json`, `package.json` and `composer.json`
-and prints the tag, e.g. `v1.2.0` (the `v` follows the repo's existing tags).
+1. Get the options:
 
-- If it fails because the files disagree or the tag already exists, stop before
-  committing and show its message: the version wasn't bumped (or was bumped in only
-  some files). Don't bump it yourself; the user decides the number.
-- If it fails because there's no version file, ask the user for the version, then
-  carry on with that tag.
+   ```bash
+   ${CLAUDE_SKILL_DIR}/scripts/release-version.sh
+   ```
+
+   It prints `current` (the latest release, or `0.0.0` when there are none), the
+   version files and the version in them (`.claude-plugin/plugin.json`, `package.json`,
+   `composer.json`), and the next `patch`, `minor` and `major` versions. If it fails
+   because the version files disagree, stop and show its message.
+
+2. Pick a suggestion from the changes being released (the diff and the conversation):
+   **major** for anything that breaks how people use it (removed or renamed commands,
+   options or files they rely on), **minor** for new features, **patch** for fixes and
+   small changes only. If the version files are already ahead of `current` (the user
+   bumped them by hand), suggest keeping that version instead.
+
+3. Ask with a question that has buttons (the AskUserQuestion tool where it exists):
+   one option each for patch, minor and major, labeled with the bump and the resulting
+   version (e.g. "Minor: 1.3.0"), plus "Keep 0.5.1" when the files are already ahead.
+   Put your suggestion first and mark it "(Recommended)", and say in a few words why.
+   The user can also type a different version.
+
+4. Check the chosen version isn't already released:
+
+   ```bash
+   ${CLAUDE_SKILL_DIR}/scripts/release-version.sh check <version>
+   ```
+
+   It prints the tag (e.g. `v1.3.0`; the `v` follows the repo's existing tags). If the
+   tag already exists, say so and ask again.
+
+5. If the version files don't already hold that version, write it into them, so it's
+   part of the commit:
+
+   ```bash
+   ${CLAUDE_SKILL_DIR}/scripts/release-version.sh set <version>
+   ```
+
+   With no version files it changes nothing, and the release is just the tag.
 
 After the merge and the local fast-forward, publish the release on the default branch:
 
 - GitHub: `gh release create <tag> --target <default> --title "<tag>" --notes "<notes>"`
-- Forgejo / Gitea: `${CLAUDE_SKILL_DIR}/scripts/forge.sh release-create <tag> <default> "<tag>" "<notes>"`
+- Forgejo / Gitea: `${CLAUDE_SKILL_DIR}/scripts/gitea.sh release-create <tag> <default> "<tag>" "<notes>"`
 
 `<notes>` is the merged PR's title as a heading, then its summary. Then run
 `git fetch --tags` and report the release URL.
 
-### Which forge (GitHub vs Forgejo/Gitea)
+### Which host (GitHub, Bitbucket, Forgejo/Gitea)
 
-Before any PR step, check the remote with the bundled helper (run from the repo):
+Before any PR step (and before the release check for `gacppmr`), find the host (run from the repo):
 
 ```bash
-${CLAUDE_SKILL_DIR}/scripts/forge.sh kind
+${CLAUDE_SKILL_DIR}/scripts/detect-host.sh
 ```
 
-- `github`: use `gh` as usual.
-- `forgejo` / `gitea`: use the helper; `gh` doesn't work there. It reads the
-  host from `origin`, the web URL from `~/.config/gac/hosts.json`, and the API
-  token from the macOS Keychain (service `gac-forge:<host>`). Nothing about a
-  particular server is hard-coded. The helper needs macOS, `curl` and `jq`.
-  - default branch: `forge.sh default-branch`
-  - open the PR: `forge.sh pr-create <base> "<title>" "<body>"` → prints `<number> <url>`
-  - CI: `forge.sh pr-checks <number>` → `success` / `pending` / `failure` / `error` /
-    `none`. `none` means the repo has no CI, so it's OK to merge. While `pending`, re-check
-    (in the background, not a tight loop). Never merge on `pending`, `failure` or `error`.
-  - merge: `forge.sh pr-merge <number>` (merge commit, deletes the branch) → `merged`
-  - Then `git switch <default> && git pull --ff-only && git fetch --prune && git branch -d <branch>`.
-- `unknown`: the host isn't registered yet. Ask the user for the forge's web URL (e.g.
-  `http://git.example.lan:3000`), then launch `${CLAUDE_SKILL_DIR}/scripts/forge.sh setup <web-url>`
-  in a terminal the user can type in (it prompts for the token, hidden). Never put a token on a
-  command line or in a file yourself.
+- `github`: use `gh`.
+- `bitbucket` (Bitbucket Cloud): use `${CLAUDE_SKILL_DIR}/scripts/bitbucket.sh`; `gh`
+  doesn't work there. Commands: `default-branch`, `pr-create <base> "<title>" "<body>"`
+  → `<number> <url>`, `pr-checks <number>`, `pr-approvals <number>`, `pr-merge <number>`.
+  If it says there's no token, launch `bitbucket.sh setup` in a terminal the user can
+  type in (it asks for their Atlassian email and a token, hidden).
+- `gitea` (a registered Forgejo or Gitea server): use `${CLAUDE_SKILL_DIR}/scripts/gitea.sh`;
+  `gh` doesn't work there. Same commands as Bitbucket, plus `release-create`.
+- `unknown`: probably a Forgejo/Gitea server that isn't registered yet. Ask the user for
+  its web URL (e.g. `http://git.example.lan:3000`), then launch
+  `${CLAUDE_SKILL_DIR}/scripts/gitea.sh setup <web-url>` in a terminal the user can type in
+  (it prompts for the token, hidden). If it isn't Forgejo/Gitea either, say PR steps
+  aren't supported for that host and stop after the push.
 
-If the helper reports an HTTP 401/403 on create or merge, the token is missing a scope
-(it needs write access to repositories and issues): say so and stop.
+The scripts read the host and repo from `origin`, settings from `~/.config/gac/hosts.json`
+and tokens from the macOS Keychain; nothing about a particular server is hard-coded. They
+need macOS, `curl` and `jq`. Never put a token on a command line or in a file yourself.
 
-- Typing a shorthand is the user's explicit go-ahead for every step it names,
-  and only those. Nothing past them (no tag, no release) without a new ask.
+`pr-checks` prints `success` / `pending` / `failure` / `error` / `none`. `none` means the
+repo has no CI, which counts as passing. After a merge, run
+`git switch <default> && git pull --ff-only && git fetch --prune && git branch -d <branch>`.
+
+If a script reports HTTP 401/403, the token is missing a permission (write access to
+repositories and pull requests): say so and stop.
+
+- Typing a shorthand is the user's explicit go-ahead for every step it names except
+  the merge, which always waits for the user's click. Nothing past the steps it
+  names (no tag, no release) without a new ask.
 - Never commit on a main branch: create a descriptively named branch first.
-- Never merge while a check is failing or pending; if CI fails, stop and show it.
+- Never merge while a check is failing or pending, or a required review is missing.
 - Attribution in commit messages and PR descriptions follows the user's and
   the project's CLAUDE.md, not this skill.
 
