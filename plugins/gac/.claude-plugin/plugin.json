@@ -1,0 +1,22 @@
+{
+	"name": "gac",
+	"version": "1.0.0",
+	"description": "Git add and commit in one step, with shorthands that go further: gacp pushes, gacpp opens a PR, gacppm merges it once CI passes. Works with GitHub and self-hosted Forgejo/Gitea, and sources nvm so Husky hooks run. /gac runs it.",
+	"author": {
+		"name": "WebDevNerdStuff & Bunnies... lots and lots of bunnies!",
+		"email": "webdevnerdstuff@gmail.com",
+		"url": "https://webdevnerdstuff.com"
+	},
+	"homepage": "https://github.com/webdevnerdstuff/claude-marketplace",
+	"repository": "https://github.com/webdevnerdstuff/claude-marketplace",
+	"license": "MIT",
+	"keywords": [
+		"skills",
+		"git",
+		"commit",
+		"pull-request",
+		"forgejo",
+		"gitea",
+		"husky"
+	]
+}
