@@ -1,12 +1,22 @@
 {
 	"name": "webdevnerdstuff",
-	"description": "All of WebDevNerdStuff's Claude Code mods in one marketplace: add it once, install any of them.",
+	"description": "All of WebDevNerdStuff's Claude Code mods and skills in one marketplace: add it once, install any of them.",
 	"owner": {
 		"name": "WebDevNerdStuff & Bunnies... lots and lots of bunnies!",
 		"email": "webdevnerdstuff@gmail.com",
 		"url": "https://webdevnerdstuff.com"
 	},
 	"plugins": [
+		{
+			"name": "gac",
+			"description": "Git add and commit in one step, with shorthands that push, open a PR and merge it. GitHub and self-hosted Forgejo/Gitea. /gac runs it.",
+			"source": "./plugins/gac"
+		},
+		{
+			"name": "handoff",
+			"description": "Copy-paste session handoff summaries for continuing work or reporting completion. /handoff writes one.",
+			"source": "./plugins/handoff"
+		},
 		{
 			"name": "loadout",
 			"description": "Everything Claude Code has equipped, in one pane: your local, project, plugin and claude.ai account skills, and every enabled plugin. What each skill does, where it lives, whether it is off. /loadout opens it.",

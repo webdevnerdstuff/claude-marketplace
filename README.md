@@ -1,48 +1,114 @@
-# claude-mods
+<h1 align="center">
+	<picture>
+		<source media="(prefers-color-scheme: dark)" srcset="docs/brand/banner-dark.svg">
+		<img alt="claude-marketplace" src="docs/brand/banner-light.svg" width="720">
+	</picture>
+</h1>
 
-All of my Claude Code mods in one marketplace. Add it once, then install any of them.
+<p align="center">
+	<strong>All of my Claude Code mods and skills in one marketplace. Add it once, then install any of them.</strong>
+</p>
 
-## Add the marketplace
+<p align="center">
+	<img alt="Marketplace: webdevnerdstuff" src="https://img.shields.io/badge/marketplace-webdevnerdstuff-ff1190">
+	<img alt="Mods: 3" src="https://img.shields.io/badge/mods-3-2492ff">
+	<img alt="Skills: 2" src="https://img.shields.io/badge/skills-2-ffb46a">
+	<a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/webdevnerdstuff/claude-marketplace?color=555"></a>
+</p>
 
-In a Claude Code terminal session:
+<p align="center">
+	<a href="#quick-start">Quick start</a> ·
+	<a href="#mods">Mods</a> ·
+	<a href="#skills">Skills</a> ·
+	<a href="#update-and-remove">Update and remove</a>
+</p>
+
+## Quick start
+
+In a Claude Code terminal session, add the marketplace once:
 
 ```bash
-/plugin marketplace add webdevnerdstuff/claude-mods
+/plugin marketplace add webdevnerdstuff/claude-marketplace
 ```
 
-## Install
+Then install whatever you want from it by name:
 
-Pick **user** scope when asked, so a mod loads in every session, including the desktop app's.
+```bash
+/plugin install <name>@webdevnerdstuff
+```
 
-### loadout
+> [!TIP]
+> Pick **user** scope when asked, so it loads in every session, including the desktop app's.
 
-Every skill and plugin Claude Code has equipped, in one pane. `/loadout` opens it.
+> [!NOTE]
+> **Mods** change how Claude Code looks or behaves: panes, hooks, highlighting. Each one lives in its own repo.
+> **Skills** are instructions Claude follows for a task. They live in this repo, under [`plugins/`](plugins).
+> Both install the same way, as plugins.
+
+## Mods
+
+| Mod | What it does | Opens with |
+| --- | --- | --- |
+| [**loadout**](https://github.com/webdevnerdstuff/claude-loadout) | Every skill and plugin Claude Code has equipped, in one pane. | `/loadout` |
+| [**session-mover**](https://github.com/webdevnerdstuff/claude-session-mover) | Move Claude desktop Code sessions between sidebar workspaces from a pane. | `/move-sessions` |
+| [**skin-code**](https://github.com/webdevnerdstuff/claude-skin-code) | VS Code syntax highlighting and themes for code blocks in Claude Code replies, through Shiki. | `/skin-code` |
 
 ```bash
 /plugin install loadout@webdevnerdstuff
 ```
 
-### session-mover
-
-Move Claude desktop Code sessions between sidebar workspaces from a pane. `/move-sessions` opens it.
-
 ```bash
 /plugin install session-mover@webdevnerdstuff
 ```
-
-### skin-code
-
-VS Code syntax highlighting and themes for code blocks in Claude Code replies, through Shiki. `/skin-code` switches it.
 
 ```bash
 /plugin install skin-code@webdevnerdstuff
 ```
 
-Each mod's own repo has the full docs: [claude-loadout](https://github.com/webdevnerdstuff/claude-loadout), [claude-session-mover](https://github.com/webdevnerdstuff/claude-session-mover), [claude-skin-code](https://github.com/webdevnerdstuff/claude-skin-code).
+Each mod's own repo has its full docs.
+
+## Skills
+
+| Skill | What it does | Runs with |
+| --- | --- | --- |
+| [**gac**](plugins/gac/skills/gac/SKILL.md) | Git add and commit in one step, with shorthands that push, open a PR and merge it once CI passes. | `/gac` |
+| [**handoff**](plugins/handoff/skills/handoff/SKILL.md) | A self-contained handoff summary of the session in one copyable block, so work picks up cleanly in a fresh session. For finished work, a short completion summary ready for Jira, Slack or an email. | `/handoff` |
+
+If you already have a command with the same name, use the long form instead: `/gac:gac`, `/handoff:handoff`.
+
+### gac
+
+```bash
+/plugin install gac@webdevnerdstuff
+```
+
+Add files and a message after the command, or leave them off and it works them out from `git status` and the diff: `/gac src/app.ts "fix header link"`. Each extra letter adds a step:
+
+| Typed | Does |
+| --- | --- |
+| `gac` | Stage and commit |
+| `gacp` | …then push |
+| `gacpp` | …then open a PR into the default branch |
+| `gacppm` | …then wait for CI to pass, merge the PR and update your local default branch |
+
+- **GitHub** PRs go through the [`gh`](https://cli.github.com) CLI.
+- **Forgejo and Gitea** PRs go through a bundled helper. The first time, it asks for your forge's URL and an API token, and keeps the token in the macOS Keychain. It needs macOS, `curl` and `jq`.
+- **Husky hooks:** if you use [nvm](https://github.com/nvm-sh/nvm), it's loaded before committing so Husky hooks (lint-staged and the like) can find Node.
+- **Jira tickets:** it never writes the ticket number into the message itself. Pair it with Husky's [`jira-prepare-commit-msg`](https://www.npmjs.com/package/jira-prepare-commit-msg) hook, which adds the ticket from the branch name (`ABC-123-fix-header` → `ABC-123`).
+- **Attribution:** whether commits and PRs credit Claude (e.g. a `Co-Authored-By` line) is up to your `CLAUDE.md` and the project's, not this skill.
+- It never commits on a main branch, and never merges while CI is failing or still running.
+
+### handoff
+
+```bash
+/plugin install handoff@webdevnerdstuff
+```
+
+Add text after the command to narrow the focus, e.g. `/handoff just the auth migration`.
 
 ## Update and remove
 
-To update, refresh the marketplace, then update the mod and restart Claude Code:
+To update, refresh the marketplace, then update the plugin and restart Claude Code:
 
 ```bash
 claude plugin marketplace update webdevnerdstuff
@@ -52,7 +118,10 @@ claude plugin marketplace update webdevnerdstuff
 claude plugin update <name>@webdevnerdstuff
 ```
 
-To remove a mod:
+<details>
+<summary>Remove a plugin or the marketplace</summary>
+
+To remove a plugin:
 
 ```bash
 claude plugin uninstall <name>@webdevnerdstuff
@@ -63,6 +132,8 @@ To remove the marketplace:
 ```bash
 claude plugin marketplace remove webdevnerdstuff
 ```
+
+</details>
 
 ## License
 

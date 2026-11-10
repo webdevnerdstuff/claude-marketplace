@@ -1,0 +1,19 @@
+{
+	"name": "handoff",
+	"version": "1.0.0",
+	"description": "Copy-paste session handoff summaries for continuing work in a fresh session, or a clean completion summary for Jira, Slack or email. /handoff writes one.",
+	"author": {
+		"name": "WebDevNerdStuff & Bunnies... lots and lots of bunnies!",
+		"email": "webdevnerdstuff@gmail.com",
+		"url": "https://webdevnerdstuff.com"
+	},
+	"homepage": "https://github.com/webdevnerdstuff/claude-marketplace",
+	"repository": "https://github.com/webdevnerdstuff/claude-marketplace",
+	"license": "MIT",
+	"keywords": [
+		"skills",
+		"handoff",
+		"session",
+		"summary"
+	]
+}
