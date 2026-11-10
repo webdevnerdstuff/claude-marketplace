@@ -94,7 +94,7 @@ Add files and a message after the command, or leave them off and it works them o
 
 Typing the shorthand as a plain message (`gacp`) works too.
 
-**Merging always waits for you.** Once CI passes, `/gacppm` shows the PR link, the CI result and its approvals, and asks you to click **Merge**. It won't offer to merge while a check is failing or still running, or while a required review is missing, and it never bypasses branch protection.
+**Merging waits for one click from you.** As soon as the PR is open, `/gacppm` shows its link, the CI state and its approvals, and asks once. If CI is still running, click **Merge when CI passes** and it waits, then merges by itself when every check passes. If a check fails, it stops without merging. It won't offer to merge on a failed check or a missing required review, and it never bypasses branch protection.
 
 **Releases always ask first.** Before committing anything, `/gacppmr` asks whether this is a major, minor or patch release, showing the version each one gives (e.g. "Minor: 1.3.0") with its suggestion first. It writes the version you pick into `.claude-plugin/plugin.json`, `package.json` and `composer.json` (whichever exist) as part of the commit, and tags the release to match: `1.3.0` becomes `v1.3.0`. If you already bumped the files yourself, it offers to keep that version.
 
