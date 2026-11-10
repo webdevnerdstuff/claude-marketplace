@@ -52,28 +52,40 @@ failure and reporting it:
 | `gac` | commit |
 | `gacp` | commit, push (`git push -u origin <branch>`) |
 | `gacpp` | commit, push, open a PR into the repo's default branch |
-| `gacppm` | commit, push, open a PR, wait for CI to pass, **ask the user to confirm the merge** (see **Merging** below), merge it (a merge commit, deleting the branch), then fast-forward local main |
+| `gacppm` | commit, push, open a PR, **ask the user once to confirm the merge** (see **Merging** below), wait for CI to pass, merge it (a merge commit, deleting the branch), then fast-forward local main |
 | `gacppmr` | everything `gacppm` does, then tag the merge and publish a release (see **Release** below). On Bitbucket, which has no releases, it runs as `gacppm` |
 
 ### Merging (`gacppm` and `gacppmr`)
 
-The shorthand authorizes getting the PR ready, not the merge itself. Never merge
-without the user's click:
+The shorthand authorizes getting the PR ready, not the merge itself. Ask the user
+**once**, as soon as the PR is open, and never make them time it against CI:
 
-1. Wait for CI (`pr-checks`, or `gh pr checks <number>` on GitHub). While it's
-   pending, re-check in the background, not in a tight loop. If anything failed,
-   stop and show it; don't offer to merge.
-2. Check reviews: on GitHub `gh pr view <number> --json reviewDecision,mergeStateStatus`;
-   on Bitbucket and Forgejo/Gitea `pr-approvals <number>`. If the host says a review
-   is required and it hasn't been approved (`REVIEW_REQUIRED`, `CHANGES_REQUESTED`,
-   or `mergeStateStatus` `BLOCKED`), stop: say who needs to approve it, give the PR
-   link, and don't offer to merge.
-3. Otherwise ask the user with a question that has buttons (the AskUserQuestion
-   tool where it exists): the PR link, the CI result (or "no CI"), the approvals,
-   then **Merge** / **Don't merge**. Merge only on **Merge**. On anything else,
-   leave the PR open, give its link and stop (no release either).
-4. If the merge itself is refused (branch protection, missing approval), show the
-   host's message and stop. Never retry with admin or bypass flags.
+1. Right after opening the PR, check where it stands:
+   - CI: `pr-checks <number>`, or `gh pr checks <number>` on GitHub. It may still be
+     running; that's fine.
+   - Reviews: on GitHub `gh pr view <number> --json reviewDecision`; on Bitbucket and
+     Forgejo/Gitea `pr-approvals <number>`.
+   If a check has already failed, or a required review is missing or changes were
+   requested (`REVIEW_REQUIRED`, `CHANGES_REQUESTED`), stop: show what failed or who
+   needs to approve, give the PR link, and don't offer to merge.
+2. Otherwise ask the user with a question that has buttons (the AskUserQuestion
+   tool where it exists): the PR link, the CI state ("passed", "running", or "no CI")
+   and the approvals. While CI is still running, the buttons are
+   **Merge when CI passes** / **Don't merge**; once it has passed (or there's no CI),
+   **Merge** / **Don't merge**. On anything other than a merge button, leave the PR
+   open, give its link and stop (no release either).
+3. The merge click is the user's approval for this PR. If CI was still running, wait
+   for it in the background (`gh pr checks <number> --watch` on GitHub; elsewhere
+   re-run `pr-checks` every 15–30 seconds, never a tight loop). Don't ask again:
+   - all checks passed: merge right away;
+   - a check failed: don't merge; show the failure and the PR link and stop (no
+     release either).
+4. Merge with `gh pr merge <number> --merge --delete-branch` on GitHub, or
+   `pr-merge <number>` elsewhere. On GitHub, a PR can read `BLOCKED` while required
+   checks are still running; that's not a refusal, keep waiting for CI. If the merge
+   itself is refused after CI passed (branch protection, a required check that never
+   runs, a missing approval), show the host's message and stop. Never retry with admin
+   or bypass flags.
 
 ### Release (`gacppmr` only)
 
@@ -168,7 +180,8 @@ If a script reports HTTP 401/403, the token is missing a permission (write acces
 repositories and pull requests): say so and stop.
 
 - Typing a shorthand is the user's explicit go-ahead for every step it names except
-  the merge, which always waits for the user's click. Nothing past the steps it
+  the merge, which always waits for the user's one click (given while CI may still
+  be running). Nothing past the steps it
   names (no tag, no release) without a new ask.
 - Never commit on a main branch: create a descriptively named branch first.
 - Never merge while a check is failing or pending, or a required review is missing.
