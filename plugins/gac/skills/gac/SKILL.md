@@ -159,7 +159,10 @@ ${CLAUDE_SKILL_DIR}/scripts/detect-host.sh
   doesn't work there. Commands: `default-branch`, `pr-create <base> "<title>" "<body>"`
   → `<number> <url>`, `pr-checks <number>`, `pr-approvals <number>`, `pr-merge <number>`.
   If it says there's no token, launch `bitbucket.sh setup` in a terminal the user can
-  type in (it asks for their Atlassian email and a token, hidden).
+  type in (it asks for their Atlassian email and a token, hidden). Setup needs a real
+  interactive terminal, run from the repo: use a terminal tool if you have one, otherwise
+  ask the user to run it in Terminal/iTerm. Never suggest the `!` prefix or the Bash
+  tool for it; neither has a terminal, so it can't prompt. The same goes for `gitea.sh setup`.
 - `gitea` (a registered Forgejo or Gitea server): use `${CLAUDE_SKILL_DIR}/scripts/gitea.sh`;
   `gh` doesn't work there. Same commands as Bitbucket, plus `release-create`.
 - `unknown`: probably a Forgejo/Gitea server that isn't registered yet. Ask the user for

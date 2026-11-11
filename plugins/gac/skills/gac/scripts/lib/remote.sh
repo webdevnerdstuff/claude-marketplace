@@ -54,8 +54,15 @@ host_set() {
 # keychain_get <service>: the token saved under that Keychain service, or nothing.
 keychain_get() { security find-generic-password -a "$USER" -s "$1" -w 2>/dev/null; }
 
+# need_tty: stop with a clear message when there is no terminal to prompt on
+# (e.g. run through Claude Code's "!" prefix), instead of read failing silently.
+need_tty() {
+  [[ -t 0 ]] || die "setup asks questions, so it needs an interactive terminal; run it in Terminal/iTerm, not through Claude Code"
+}
+
 # keychain_prompt <service> <label> <prompt>: ask for a token (hidden) and save it.
 keychain_prompt() {
+  need_tty
   local tok
   read -r -s -p "$3: " tok; echo
   [[ -n "$tok" ]] || die "no token entered"
