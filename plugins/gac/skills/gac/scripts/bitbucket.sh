@@ -47,6 +47,7 @@ case "$HOST" in bitbucket.org|*.bitbucket.org) ;; *) die "origin isn't on bitbuc
 
 case "$cmd" in
   setup)
+    need_tty
     read -r -p "Atlassian account email (leave blank for a workspace/repository access token): " email
     host_set "$BB_HOST" "$(jq -n --arg e "$email" '{type: "bitbucket", email: $e}')"
     keychain_prompt "$SERVICE" "gac token (Bitbucket)" \

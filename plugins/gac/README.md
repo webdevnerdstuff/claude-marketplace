@@ -105,12 +105,12 @@ You can also type a different version. If you already bumped the version files y
 
 ## Where PRs work
 
-| Host | PRs and merges | Releases |
-| --- | --- | --- |
-| GitHub | Through the [`gh`](https://cli.github.com) CLI | Yes |
-| Forgejo and Gitea | Through a bundled script | Yes |
-| Bitbucket Cloud | Through a bundled script | No |
-| Anything else | No: commit and push only | No |
+| Host | PRs and merges | Releases | One-time setup |
+| --- | --- | --- | --- |
+| GitHub | Through the [`gh`](https://cli.github.com) CLI | Yes | `gh auth login` |
+| Forgejo and Gitea | Through a bundled script | Yes | [An API token](#forgejo-and-gitea) |
+| Bitbucket Cloud | Through a bundled script | No | [An API token](#bitbucket-cloud) |
+| Anything else | No: commit and push only | No | None |
 
 > [!NOTE]
 > **Bitbucket has no releases.** `/gacppmr` on a Bitbucket repo tells you so and runs as `/gacppm`: commit, push, PR and merge, with no tag or release.
@@ -123,7 +123,54 @@ The first time, it asks for your server's web URL (e.g. `http://git.example.lan:
 
 ### Bitbucket Cloud
 
-The first time, it opens a terminal for your Atlassian email and an [API token](https://id.atlassian.com/manage-profile/security/api-tokens) with the Bitbucket scopes `read:repository`, `read:pullrequest` and `write:pullrequest`. A workspace or repository access token works too; leave the email blank for one of those. Self-hosted Bitbucket Server / Data Center isn't supported.
+> [!IMPORTANT]
+> **PRs and merges on Bitbucket need a one-time API token.** Your SSH key only covers `git push`. Bitbucket's API, which opens and merges PRs, doesn't accept it. Until the token is saved, `/gacpp` and `/gacppm` stop after the push.
+
+You do this once per Mac, and it covers every Bitbucket Cloud repo.
+
+**1. Create the token**
+
+1. Open [Atlassian API tokens](https://id.atlassian.com/manage-profile/security/api-tokens) and choose **Create API token with scopes**.
+2. Give it a name and an expiration date, and pick **Bitbucket** as the app.
+3. Tick these scopes, then create the token and copy it:
+
+   | Scope | Used for |
+   | --- | --- |
+   | `read:repository` | Finding the default branch |
+   | `read:pullrequest` | Reading CI checks and approvals |
+   | `write:pullrequest` | Opening and merging PRs |
+
+**2. Save it**
+
+Open a real terminal (Terminal, iTerm or the desktop app's Terminal panel) and `cd` into any repo whose `origin` is on Bitbucket:
+
+```bash
+cd ~/path/to/your-bitbucket-repo
+```
+
+Then run the setup script. This line finds the newest installed copy of gac for you:
+
+```bash
+"$(printf '%s\n' ~/.claude/plugins/cache/webdevnerdstuff/gac/*/ | sort -V | tail -1)skills/gac/scripts/bitbucket.sh" setup
+```
+
+Setup asks two questions:
+
+| Prompt | What to enter |
+| --- | --- |
+| Atlassian account email | The email you sign in to Bitbucket with |
+| Bitbucket token | The token you copied. Nothing shows as you paste; press Enter |
+
+It ends with `Connected to <workspace>/<repo> on Bitbucket.` The token is kept in the macOS Keychain and never passes through the chat.
+
+> [!WARNING]
+> Don't run setup through Claude Code's `!` prefix. It has no terminal to ask its questions in, so nothing gets saved.
+
+**3. Carry on**
+
+Tell Claude it's done, or run the command again. When the token expires, repeat steps 1 and 2.
+
+A workspace or repository access token with pull request write access works too; leave the email blank for one of those. Self-hosted Bitbucket Server / Data Center isn't supported.
 
 > [!TIP]
 > An HTTP 401 or 403 from either script means the token is missing a permission. Make a new one with the scopes above.
