@@ -71,60 +71,18 @@ Each mod's own repo has its full docs.
 
 | Skill | What it does | Runs with |
 | --- | --- | --- |
-| [**gac**](plugins/gac/skills/gac/SKILL.md) | Git add and commit in one step, with shorthands that push, open a PR, merge it once CI passes and you confirm, and publish a release. GitHub, Bitbucket Cloud, Forgejo and Gitea. | `/gac` `/gacp` `/gacpp` `/gacppm` `/gacppmr` |
-| [**handoff**](plugins/handoff/skills/handoff/SKILL.md) | A self-contained handoff summary of the session in one copyable block, so work picks up cleanly in a fresh session. For finished work, a short completion summary ready for Jira, Slack or an email. | `/handoff` |
-
-If you already have a command with the same name, use the long form instead: `/gac:gac`, `/handoff:handoff`.
-
-### gac
+| [**gac**](plugins/gac) | Git add and commit in one step, with shorthands that push, open a PR, merge it once CI passes and you confirm, and publish a release. GitHub, Bitbucket Cloud, Forgejo and Gitea. | `/gac` `/gacp` `/gacpp` `/gacppm` `/gacppmr` |
+| [**handoff**](plugins/handoff) | A self-contained handoff summary of the session in one copyable block, so work picks up cleanly in a fresh session. For finished work, a short completion summary ready for Jira, Slack or an email. Can write one by itself before an idle session's cache expires. | `/handoff` |
 
 ```bash
 /plugin install gac@webdevnerdstuff
 ```
 
-Add files and a message after the command, or leave them off and it works them out from `git status` and the diff: `/gac src/app.ts "fix header link"`. Each extra letter adds a step:
-
-| Command | Does |
-| --- | --- |
-| `/gac` | Stage and commit |
-| `/gacp` | …then push |
-| `/gacpp` | …then open a PR into the default branch |
-| `/gacppm` | …then wait for CI to pass, merge the PR once you confirm, and update your local default branch |
-| `/gacppmr` | …then tag the merge and publish a release |
-
-Typing the shorthand as a plain message (`gacp`) works too.
-
-**Merging waits for one click from you.** As soon as the PR is open, `/gacppm` shows its link, the CI state and its approvals, and asks once. If CI is still running, click **Merge when CI passes** and it waits, then merges by itself when every check passes. If a check fails, it stops without merging. It won't offer to merge on a failed check or a missing required review, and it never bypasses branch protection.
-
-**Releases always ask first.** Before committing anything, `/gacppmr` asks whether this is a major, minor or patch release, showing the version each one gives (e.g. "Minor: 1.3.0") with its suggestion first. It writes the version you pick into `.claude-plugin/plugin.json`, `package.json` and `composer.json` (whichever exist) as part of the commit, and tags the release to match: `1.3.0` becomes `v1.3.0`. If you already bumped the files yourself, it offers to keep that version.
-
-#### Where PRs work
-
-| Host | PRs and merges | Releases |
-| --- | --- | --- |
-| GitHub | Through the [`gh`](https://cli.github.com) CLI | Yes |
-| Forgejo and Gitea | Through a bundled script | Yes |
-| Bitbucket Cloud | Through a bundled script | No |
-| Anything else | No: commit and push only | No |
-
-> [!NOTE]
-> **Bitbucket has no releases.** `/gacppmr` on a Bitbucket repo tells you so and runs as `/gacppm`: commit, push, PR and merge, with no tag or release.
-
-- **Forgejo and Gitea:** the first time, it asks for your server's URL and an API token with write access to repositories and issues.
-- **Bitbucket Cloud:** the first time, it asks for your Atlassian email and an [API token](https://id.atlassian.com/manage-profile/security/api-tokens) with the Bitbucket scopes `read:repository`, `read:pullrequest` and `write:pullrequest`. A workspace or repository access token works too; leave the email blank for one of those. Self-hosted Bitbucket Server / Data Center isn't supported.
-- Tokens are kept in the macOS Keychain, and the scripts need macOS, `curl` and `jq`.
-- **Husky hooks:** if you use [nvm](https://github.com/nvm-sh/nvm), it's loaded before committing so Husky hooks (lint-staged and the like) can find Node.
-- **Jira tickets:** it never writes the ticket number into the message itself. Pair it with Husky's [`jira-prepare-commit-msg`](https://www.npmjs.com/package/jira-prepare-commit-msg) hook, which adds the ticket from the branch name (`ABC-123-fix-header` → `ABC-123`).
-- **Attribution:** whether commits and PRs credit Claude (e.g. a `Co-Authored-By` line) is up to your `CLAUDE.md` and the project's, not this skill.
-- It never commits on a main branch.
-
-### handoff
-
 ```bash
 /plugin install handoff@webdevnerdstuff
 ```
 
-Add text after the command to narrow the focus, e.g. `/handoff just the auth migration`.
+Each skill's README has its full docs: [gac](plugins/gac#readme), [handoff](plugins/handoff#readme).
 
 ## Update and remove
 
