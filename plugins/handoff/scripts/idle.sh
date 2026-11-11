@@ -160,7 +160,7 @@ settings_rows() { # settings_rows <dir>
 		[ "$awake" = on ] && awake="on, but macOS only: does nothing here"
 		[ "$before" = on ] && before="on, but macOS only: does nothing here"
 	else
-		[ "$awake" = on ] && awake="on, while a timer waits, on power only"
+		[ "$awake" = on ] && awake="on: the Mac won't sleep while a timer waits (screen still turns off), on power only"
 		if [ "$before" = on ]; then
 			after=$(sleep_after_s)
 			source=$(on_power && echo power || echo battery)
@@ -338,7 +338,7 @@ Command	What it does
 `/handoff on/off`	idle handoff: Claude writes one before the cache expires
 `/handoff auto`	wait until 1 min before the cache expires (the default)
 `/handoff <minutes>`	wait this many minutes instead, 1-120
-`/handoff awake on/off`	macOS: keep the Mac awake while a timer waits
+`/handoff awake on/off`	macOS: stop the Mac sleeping while a timer waits (screen still turns off)
 `/handoff sleep on/off`	macOS: hand off a few minutes before the Mac sleeps
 `/handoff settings` (or `status`)	what everything is set to
 `/handoff help`	this list

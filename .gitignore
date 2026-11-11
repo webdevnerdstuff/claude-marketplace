@@ -1,5 +1,6 @@
 node_modules/
 .DS_Store
 
-# Laid by Claude Code each time it loads the plugin.
-.claude-plugin/types/
+# Laid by Claude Code each time it loads a plugin with a hooks module, for editors.
+**/.claude-plugin/types/
+plugins/*/tsconfig.json

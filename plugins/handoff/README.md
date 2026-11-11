@@ -102,7 +102,7 @@ Turn it on and Claude writes the handoff by itself when you've been idle long en
 | `/handoff on` / `/handoff off` | Turns idle handoff on or off. On uses the wait you last chose, `auto` until you pick one |
 | `/handoff auto` | Turns it on and waits until about a minute before your cache expires: 4 minutes on a 5-minute cache, 59 on a 1-hour cache. Detected from the session; the default |
 | `/handoff 20` | Turns it on and waits 20 minutes instead (1–120) |
-| `/handoff awake on` / `/handoff awake off` | Keeps your Mac from going to sleep while a timer waits, so the handoff still happens (see below). Off by default; `awake on` also turns idle handoff on |
+| `/handoff awake on` / `/handoff awake off` | Keeps your Mac from going to sleep while a timer waits, so the handoff still happens. The screen still turns off and locks as usual (see below). Off by default; `awake on` also turns idle handoff on |
 | `/handoff sleep on` / `/handoff sleep off` | Hands off a few minutes before your Mac goes to sleep, if that comes before the wait runs out (see below). Off by default; `sleep on` also turns idle handoff on |
 | `/handoff settings` or `/handoff status` | Shows the current settings |
 | `/handoff help` | Lists every option, with your current settings |
@@ -110,7 +110,9 @@ Turn it on and Claude writes the handoff by itself when you've been idle long en
 - It fires once per idle stretch. Your next message re-arms it.
 - Each idle handoff is a full reply, so it uses tokens. On a 5-minute cache, with frequent short breaks, you may prefer it off or a longer wait.
 - It needs the session to stay open, and doesn't run in `claude -p`.
-- Each session times itself. Working in another session doesn't stop it, and the settings apply to every session.
+- Each session times itself. Working in another session doesn't stop it.
+- **The settings apply to every session.** `/handoff 5` in one session sets a 5-minute wait in all of them, open ones included.
+- It runs a small bash script after each reply, so it needs macOS, Linux, or Windows with [Git Bash](https://git-scm.com/downloads/win). It hasn't been tested on Windows.
 - For a focus that is one of those words, quote it: `/handoff "settings"`.
 
 ### Sleep and keep-awake
@@ -124,7 +126,7 @@ Most Macs go to sleep a few minutes after the display turns off, which is often 
   - The timing is an estimate. If an app is keeping the Mac awake (playing audio, say), the handoff comes earlier than it needed to, which is still cheap.
   - With `awake on` too, it only acts while keep-awake isn't holding the Mac awake, e.g. on battery.
   - On Linux and Windows it does nothing.
-- **`/handoff awake on`** (macOS). While a timer is waiting, it keeps the Mac from going to sleep with macOS's built-in `caffeinate`, and lets go the moment the handoff fires or you type. Nothing to install.
+- **`/handoff awake on`** (macOS). While a timer is waiting, it keeps the Mac itself from going to sleep (not the screen: that still turns off) with macOS's built-in `caffeinate`, and lets go the moment the handoff fires or you type. Nothing to install.
   - Only on power: on battery it lets the Mac sleep as usual, and unplugging mid-wait lets go within seconds.
   - The display still turns off and locks as usual, and closing the lid still puts the Mac to sleep.
   - On Linux and Windows it does nothing.
@@ -133,7 +135,8 @@ Most Macs go to sleep a few minutes after the display turns off, which is often 
 
 ## Good to know
 
-- **Read-only.** It runs only read-only git commands (`status`, `log`, the current branch) and never creates, changes or commits files. The summary is in the reply only.
+- **Read-only handoffs.** Writing a handoff runs only read-only git commands (`status`, `log`, the current branch) and never creates, changes or commits files. The summary is in the reply only.
+- **Settings file.** The idle handoff settings are saved in `~/.claude/handoff/`. Uninstalling the plugin leaves that folder behind; delete it if you want them gone.
 - **No secrets.** API keys, passwords and tokens become `<REDACTED>`, with a note on where the real value lives.
 - **Facts only.** Anything not confirmed working is marked "not verified" rather than reported as done.
 
