@@ -1,0 +1,28 @@
+{
+	"modules": ["./register.ts"],
+	"hooks": {
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/idle.sh stop",
+						"asyncRewake": true,
+						"timeout": 7500
+					}
+				]
+			}
+		],
+		"UserPromptSubmit": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/idle.sh prompt",
+						"timeout": 5
+					}
+				]
+			}
+		]
+	}
+}

@@ -126,6 +126,22 @@ Typing the shorthand as a plain message (`gacp`) works too.
 
 Add text after the command to narrow the focus, e.g. `/handoff just the auth migration`.
 
+#### Idle handoff
+
+Turn it on and Claude writes the handoff by itself when you've been idle long enough that the session's prompt cache is about to expire, so the summary is written while the whole conversation is still cached. It's off until you turn it on.
+
+| Command | Does |
+| --- | --- |
+| `/handoff on` / `/handoff off` | Turns idle handoff on or off |
+| `/handoff auto` | Waits until about a minute before your cache expires: 4 minutes on a 5-minute cache, 59 on a 1-hour cache. Detected from the session; the default |
+| `/handoff 20` | Waits 20 minutes instead (1–120) |
+| `/handoff status` | Shows the current setting |
+
+- It fires once per idle stretch. Your next message re-arms it.
+- Each idle handoff is a full reply, so it uses tokens. On a 5-minute cache, with frequent short breaks, you may prefer it off or a longer wait.
+- It needs the session to stay open, and doesn't run in `claude -p`.
+- For a focus that is one of those words, quote it: `/handoff "status"`.
+
 ## Update and remove
 
 To update, refresh the marketplace, then update the plugin and restart Claude Code:

@@ -1,7 +1,7 @@
 {
 	"name": "handoff",
-	"version": "1.0.0",
-	"description": "Copy-paste session handoff summaries for continuing work in a fresh session, or a clean completion summary for Jira, Slack or email. /handoff writes one.",
+	"version": "1.1.0",
+	"description": "Copy-paste session handoff summaries for continuing work in a fresh session, or a clean completion summary for Jira, Slack or email. /handoff writes one; /handoff on writes one automatically before an idle session's prompt cache expires.",
 	"author": {
 		"name": "WebDevNerdStuff & Bunnies... lots and lots of bunnies!",
 		"email": "webdevnerdstuff@gmail.com",
