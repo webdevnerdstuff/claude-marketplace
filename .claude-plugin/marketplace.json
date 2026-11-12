@@ -14,7 +14,7 @@
 		},
 		{
 			"name": "handoff",
-			"description": "Copy-paste session handoff summaries for continuing work or reporting completion. /handoff writes one, or automatically before an idle session's cache expires.",
+			"description": "Copy-paste session handoff summaries for continuing work or reporting completion, saved to the project. /handoff writes one; it also offers one as the context fills up, or writes one before an idle session's cache expires.",
 			"source": "./plugins/handoff"
 		},
 		{

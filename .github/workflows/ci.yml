@@ -17,7 +17,8 @@ concurrency:
 
 jobs:
   check:
-    name: check (claude ${{ matrix.claude }})
+    # The pinned build's name carries no version, so main's required check stays the same when the pin moves.
+    name: check (${{ matrix.claude == 'latest' && 'latest' || 'pinned' }})
     runs-on: ubuntu-latest
     # The latest build may change the plugin format before the plugins catch up: it reports, it
     # does not block.
@@ -25,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        claude: ['2.1.287', latest]
+        claude: ['2.1.311', latest]
     steps:
       - uses: actions/checkout@v4
 
@@ -54,3 +55,20 @@ jobs:
 
       - name: Syntax-check the shell scripts
         run: find plugins -name '*.sh' -print0 | xargs -0 -n 1 bash -n
+
+      # Each plugin's mod tests under Claude Code's own runner, then any shell tests beside them.
+      - name: Run plugin tests
+        run: |
+          for plugin in plugins/*/; do
+            if compgen -G "${plugin}tests/*.test.ts*" > /dev/null; then
+              echo "::group::claude plugin test $plugin"
+              claude plugin test "$plugin"
+              echo "::endgroup::"
+            fi
+            for script in "${plugin}"tests/*.sh; do
+              [ -e "$script" ] || continue
+              echo "::group::$script"
+              bash "$script"
+              echo "::endgroup::"
+            done
+          done
