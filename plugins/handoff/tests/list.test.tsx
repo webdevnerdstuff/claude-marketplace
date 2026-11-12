@@ -127,7 +127,7 @@ describe('the list pane', () => {
 		await ui.press({ key: 'start:2026-11-12-1409-b.md' });
 
 		expect(held.runs[0]).toEqual(['open', '/repo/.claude/handoff/2026-11-11-1200-a.md']);
-		expect(String(held.runs[1]?.[1]).startsWith('claude://code/new?q=')).toBe(true);
+		expect(String(held.runs[1]?.[1])).toMatch(/^claude:\/\/code\/new\?q=.+&folder=%2Frepo$/);
 	});
 
 	test('Delete trashes that file, drops its row and says so', async ($, on) => {

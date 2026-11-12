@@ -282,7 +282,8 @@ describe('the band', () => {
 		await ui.press({ key: 'start' });
 
 		expect(runs[0]?.[0]).toBe('open');
-		expect(String(runs[0]?.[1]).startsWith('claude://code/new?q=')).toBe(true);
+		// The project the handoff was saved in, so the new chat opens there and not in the app's default folder.
+		expect(String(runs[0]?.[1])).toMatch(/^claude:\/\/code\/new\?q=.+&folder=%2Frepo$/);
 		expect(held.panel?.note).toBe('');
 	});
 

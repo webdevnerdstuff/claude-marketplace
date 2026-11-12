@@ -4,6 +4,7 @@ import type { SessionMessage } from 'claude-code';
 import {
 	PURGE,
 	shortReason,
+	newChatUrl,
 	appendLog,
 	logLine,
 	STEP_LABELS,
@@ -542,5 +543,15 @@ describe('shortReason', () => {
 
 	test('is empty for an empty message', () => {
 		expect(shortReason('')).toBe('');
+	});
+});
+
+describe('newChatUrl', () => {
+	test('opens the new chat in the project the handoff was saved in', () => {
+		expect(newChatUrl('Pick up here.', '/Users/me/my repo/.claude/handoff/2026-11-12-1730-a.md')).toBe('claude://code/new?q=Pick%20up%20here.&folder=%2FUsers%2Fme%2Fmy%20repo');
+	});
+
+	test('leaves the folder out when the path is not a saved handoff', () => {
+		expect(newChatUrl('Pick up here.', '')).toBe('claude://code/new?q=Pick%20up%20here.');
 	});
 });

@@ -441,3 +441,15 @@ export function shortReason(error: unknown): string {
 
 	return named ? `${named} (${message})` : message;
 }
+
+/**
+ * The desktop app's link for a new Claude Code chat with the handoff filled in. `folder` is the
+ * project the handoff was saved in (the path before `/.claude/handoff/`); without it the app opens
+ * the chat in whichever folder it used last.
+ */
+export function newChatUrl(text: string, path: string): string {
+	const at = path.lastIndexOf('/.claude/handoff/');
+	const folder = at > 0 ? `&folder=${encodeURIComponent(path.slice(0, at))}` : '';
+
+	return `claude://code/new?q=${encodeURIComponent(text)}${folder}`;
+}
