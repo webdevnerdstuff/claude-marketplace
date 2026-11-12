@@ -4,3 +4,10 @@ node_modules/
 # Laid by Claude Code each time it loads a plugin with a hooks module, for editors.
 **/.claude-plugin/types/
 plugins/*/tsconfig.json
+
+# Handoffs the handoff plugin saves while working in this repo.
+.claude/handoff/
+
+# Working notes (specs, plans) stay local; only the brand assets are kept.
+docs/*
+!docs/brand/

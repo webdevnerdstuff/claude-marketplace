@@ -54,3 +54,20 @@ jobs:
 
       - name: Syntax-check the shell scripts
         run: find plugins -name '*.sh' -print0 | xargs -0 -n 1 bash -n
+
+      # Each plugin's mod tests under Claude Code's own runner, then any shell tests beside them.
+      - name: Run plugin tests
+        run: |
+          for plugin in plugins/*/; do
+            if compgen -G "${plugin}tests/*.test.ts*" > /dev/null; then
+              echo "::group::claude plugin test $plugin"
+              claude plugin test "$plugin"
+              echo "::endgroup::"
+            fi
+            for script in "${plugin}"tests/*.sh; do
+              [ -e "$script" ] || continue
+              echo "::group::$script"
+              bash "$script"
+              echo "::endgroup::"
+            done
+          done
