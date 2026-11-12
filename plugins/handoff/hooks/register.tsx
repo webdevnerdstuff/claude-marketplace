@@ -1,6 +1,6 @@
 import type { EngineInterface, Register } from 'claude-code'
 
-import { LIST, PURGE, SETTING, armCheck, armFrom, bar, compactPoint, chatBlock, ringLoader, freshSteps, idleTimerEnv, listTable, scriptArgs, shortReason, sizeThreshold, writeProgress } from './lib'
+import { LIST, PURGE, SETTING, armCheck, armFrom, bar, compactPoint, chatBlock, ringLoader, freshSteps, idleTimerEnv, listTable, newChatUrl, scriptArgs, shortReason, sizeThreshold, writeProgress } from './lib'
 import { listHandoffs, readHandoffs, readSize, trashFiles, writeHandoff, writeLog } from './writer'
 import type { Panel } from './writer'
 import type { HandoffList, Step } from '../types'
@@ -217,7 +217,7 @@ async function startEntry($: EngineInterface, path: string, title: string) {
 	let reason = ''
 
 	try {
-		const opened = await $.process.run(['open', `claude://code/new?q=${encodeURIComponent(text)}`])
+		const opened = await $.process.run(['open', newChatUrl(text, path)])
 		reason = opened.exitCode === 0 ? '' : shortReason(opened.stderr) || `open exited ${opened.exitCode}`
 	} catch (error) {
 		reason = shortReason(error) || 'open failed'
@@ -443,7 +443,7 @@ async function startNew($: EngineInterface) {
 		return
 	}
 
-	const opened = await $.process.run(['open', `claude://code/new?q=${encodeURIComponent(panel.text)}`]).catch(() => undefined)
+	const opened = await $.process.run(['open', newChatUrl(panel.text, panel.path)]).catch(() => undefined)
 
 	// The new chat opening is the answer; a note only says when it didn't.
 	await note($, opened?.exitCode === 0 ? '' : 'The new chat did not open. Copy it instead.')

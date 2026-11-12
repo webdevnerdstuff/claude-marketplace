@@ -1,6 +1,6 @@
 {
 	"name": "handoff",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "Copy-paste session handoff summaries for continuing work in a fresh session, or a clean completion summary for Jira, Slack or email, saved to the project's .claude/handoff/ folder. /handoff writes one; it offers one as the context nears the point where it compacts, and /handoff on writes one before an idle session's prompt cache expires.",
 	"types": "./types/index.d.ts",
 	"author": {
