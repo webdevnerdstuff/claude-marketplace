@@ -19,9 +19,10 @@
 	<a href="#install">Install</a> ·
 	<a href="#usage">Usage</a> ·
 	<a href="#what-you-get">What you get</a> ·
-	<a href="#saved-handoffs">Saved handoffs</a> ·
+	<a href="#commands">Commands</a> ·
 	<a href="#size-handoff">Size handoff</a> ·
 	<a href="#idle-handoff">Idle handoff</a> ·
+	<a href="#saved-files">Saved files</a> ·
 	<a href="#good-to-know">Good to know</a>
 </p>
 
@@ -34,29 +35,31 @@ Add the [marketplace](../../README.md#quick-start) if you haven't, then:
 ```
 
 > [!TIP]
-> If you already have a `/handoff` command, use the long form instead: `/handoff:handoff`.
+> If you already have a `/handoff` command, use the long form: `/handoff:handoff`.
 
 ## Usage
 
-Write a handoff of the whole session:
-
 ```bash
-/handoff
+/handoff                         # the whole session
+/handoff just the auth migration # one thread of the work
 ```
 
-Or add text after the command to cover just one thread of the work:
+The handoff is saved to your project, and a band above the prompt offers:
 
-```bash
-/handoff just the auth migration
-```
+| Button | Does |
+| --- | --- |
+| **Copy** | Copies it, ready to paste into a new chat |
+| **Start new chat** | Opens a new chat in the Claude desktop app with it filled in; press Return to start |
+| **Open file** | Opens the saved file |
+| **Close** | Hides the band |
 
-The handoff shows in the chat and is saved as a file in your project (see [Saved handoffs](#saved-handoffs)). A band above the prompt offers **Copy**, **Start new chat** and **Open file**. Paste it as the first message of a new session; the new session confirms what it's picking up and proposes the first step.
+Paste it as the first message of a new session. The new session confirms what it's picking up and proposes the first step.
 
 ## What you get
 
-It decides whether the work is in progress, blocked or complete, and writes for whoever reads it next.
+It works out whether the work is in progress, blocked or complete, and writes for whoever reads it next.
 
-**In progress or blocked: a full handoff**, written for a fresh session or another developer who wasn't there. It covers:
+**In progress or blocked: a full handoff** for a fresh session or a developer who wasn't there. Empty sections are left out.
 
 | Section | What's in it |
 | --- | --- |
@@ -72,9 +75,7 @@ It decides whether the work is in progress, blocked or complete, and writes for 
 | Open questions | Anything waiting on a decision |
 | Working conventions | How the work should be done, e.g. "don't commit without approval" |
 
-Empty sections are left out.
-
-**Complete: a completion summary**, written for a person: a teammate, a project manager or a ticket comment. It reads as if you wrote it yourself, with no mention of the session or AI, and pastes cleanly into Jira, Slack, GitHub or an email.
+**Complete: a completion summary** for a person, such as a teammate, a project manager or a ticket. It reads as if you wrote it, with no mention of the session or AI.
 
 <details>
 <summary>Example completion summary</summary>
@@ -95,106 +96,109 @@ Empty sections are left out.
 
 </details>
 
-## Saved handoffs
+## Commands
 
-Every handoff is saved as a markdown file in the project you're working in:
+| Command | Does |
+| --- | --- |
+| **Write** | |
+| `/handoff` | Writes a handoff of the session |
+| `/handoff <focus>` | Writes one about just that part of the work. Quote a focus that is also a command: `/handoff "list"` |
+| **Find** | |
+| `/handoff list` | Opens a pane of this project's saved handoffs (see [Saved files](#saved-files)) |
+| `/handoff purge` | Moves all of this project's saved handoffs to the Trash, after you confirm |
+| **Size handoff** | |
+| `/handoff 80%` or `/handoff at 80%` | Offers one at this share of the point where the session compacts, 50–95%. **Default: 80%** |
+| `/handoff 250k` or `/handoff at 250k` | Offers one at a fixed number of tokens instead, 50k–900k |
+| `/handoff at off` | Turns the size handoff off |
+| `/handoff size ask` | Asks first, with **Write handoff** and **Not now**. **Default** |
+| `/handoff size auto` | Writes it straight away |
+| **Idle handoff** | |
+| `/handoff on` / `/handoff off` | Turns idle handoff on or off. **Default: on** |
+| `/handoff auto` | Waits until about a minute before the prompt cache expires. **Default** |
+| `/handoff 20` or `/handoff 20m` | Waits 20 minutes instead, 1–120 |
+| `/handoff sleep on` / `off` | macOS: hands off a few minutes before the Mac goes to sleep. **Default: on** |
+| `/handoff awake on` / `off` | macOS: keeps the Mac awake while a timer waits, on power only. **Default: off** |
+| **Settings** | |
+| `/handoff settings` | Shows the current settings |
+| `/handoff help` or `/handoff h` | Lists every command, with your current settings |
+| `/handoff reset` | Puts every setting back to its default |
+
+Setting a wait, `sleep on` or `awake on` also turns idle handoff on. Settings apply to every session, open ones included.
+
+## Size handoff
+
+When the context fills up, Claude Code compacts the conversation, and a handoff written after that has less to work from. The size handoff gets in first.
+
+- **When:** after a reply ends, once the context passes the threshold. 80% of the compaction point is about 775k tokens on a 1M window and about 135k on a 200k one. With auto-compact off, it's a share of the whole window.
+- **Not now:** it asks once more, halfway through the room left before compaction (at least 10k tokens later).
+- **After `/compact` or `/clear`:** it's ready to fire again.
+- **`ask` or `auto`:** `auto` spends a model call you didn't ask for each time it fires, which is why `ask` is the default.
+
+## Idle handoff
+
+When you've been away long enough that the session's prompt cache is about to expire, it writes a handoff while the conversation is still cached. It's waiting above the prompt when you come back, with the same buttons.
+
+- **When:** about a minute before the cache expires, so 4 minutes on a 5-minute cache and 59 on a 1-hour cache. It fires once per idle stretch; your next message re-arms it.
+- **Cost:** each one is a model call. With a 5-minute cache and frequent short breaks, try a longer wait or turn it off.
+- **Skipped:** sessions with no real work, such as a single quick question.
+- **Limits:** the session must stay open, and it doesn't run in `claude -p`. Each session times itself.
+
+> [!IMPORTANT]
+> **It can't wake a sleeping computer.** If the computer sleeps and the cache expires meanwhile, the idle handoff is skipped, rather than re-reading the whole conversation at full price. Run `/handoff` yourself when you're back.
+
+### Sleep and keep-awake (macOS)
+
+Most Macs sleep soon after the display turns off, often before a 1-hour cache runs out. Pick one:
+
+- **`/handoff sleep on`** (default). It reads the Mac's sleep timers and how long you've been away, then hands off about 3 minutes before the Mac is due to sleep. With the display set to turn off after 30 minutes, an hour away gets its handoff at about minute 28. The timing is an estimate: an app keeping the Mac awake, such as one playing audio, makes it hand off earlier than needed.
+- **`/handoff awake on`**. Uses macOS's `caffeinate` to keep the Mac awake while a timer waits, then lets go when the handoff fires or you type.
+  - It only works on power: on battery, or when you unplug, the Mac sleeps as usual.
+  - The display still turns off and locks, and closing the lid still sleeps.
+  - With both on, `sleep on` only acts while `awake` isn't holding the Mac, e.g. on battery.
+- **System Settings › Battery › Options › Prevent automatic sleeping on power adapter when the display is off.** The Mac never idle-sleeps while plugged in.
+- **`caffeinate -i -t 3900`** in a terminal before you step away keeps the Mac awake for 65 minutes.
+
+## Saved files
+
+Every handoff, whether typed, size or idle, is saved in the project:
 
 ```text
 <project>/.claude/handoff/2026-11-12-0905-fix-duplicate-order-emails.md
 ```
 
-- `<project>` is the git repo's root, or the working folder outside a repo.
-- The name is the date and time, then the handoff's title.
-- Idle handoffs and size handoffs are saved the same way, so one is waiting for you when you come back.
-- `/handoff list` opens a pane beside the chat with this project's saved handoffs, newest first: each one's title, when it was saved and its status, with **Copy**, **Open file**, **Start new chat** and **Delete**, which moves that one file to the Trash. It updates when a new handoff is saved in this session while it's open; **Refresh** at the top reads the folder again, for handoffs saved by another session or files changed in Finder. Escape closes it. Where a pane can't open, the list prints as a table instead. It's the way to reach an idle handoff, which is saved while you're away and gets no buttons of its own.
-- `/handoff purge` lists this project's saved handoffs and, after you press **Delete** (or say yes), moves them to the Trash. It never deletes them for good: on Linux it uses `gio trash`, and where there's no Trash it deletes nothing.
-- `.claude/handoff/handoff.log` records what happened, one line per event: what started each handoff (typed, size offer, size auto, idle, idle before sleep, Try again) with the context size, then whether it was saved (words, time, file), skipped, cancelled or failed (and at which step). It also records size offers, **Not now**, purges and single deletes from the list. When a list button fails (Copy, Start new chat or Delete), it logs a `failed` line with the file and why, and the note in the list turns red. It keeps the last 500 lines and never holds the handoff text itself. `/handoff purge` leaves it in place.
+`<project>` is the git root, or the working folder outside a repo. The file name is the date, the time and the title.
 
-  ```text
-  2026-11-12 15:42:07  a1b2c3d4  start      size-auto · context 252k
-  2026-11-12 15:42:20  a1b2c3d4  saved      786 words in 13 s → 2026-11-12-1542-plan-dry-run-flag.md
-  ```
-- Nothing is added to `.gitignore`. To keep handoffs out of git, add `.claude/handoff/` to your `.gitignore`, or to `.git/info/exclude` for just your clone.
+**`/handoff list`** opens a pane beside the chat, newest first.
+- Each handoff shows its title, when it was saved and its status, with **Copy**, **Open file**, **Start new chat** and **Delete** (to the Trash).
+- **Refresh** picks up handoffs saved by other sessions or changed in Finder. Escape closes the pane.
+- It's how you reach an idle handoff later. Where a pane can't open, it prints a table instead.
 
-After a handoff, a band above the prompt offers:
+**`/handoff purge`** moves every saved handoff to the Trash, after you confirm. It never deletes for good: on Linux it uses `gio trash`, and with no Trash it deletes nothing.
 
-| Button | Does |
-| --- | --- |
-| **Copy** | Copies the handoff, ready to paste into a new chat |
-| **Start new chat** | Opens a new chat in the Claude desktop app with the handoff filled in; press Return to start it |
-| **Open file** | Opens the saved file |
-| **Close** | Hides the band |
+**`.claude/handoff/handoff.log`** has one line per event:
+- what started each handoff, and whether it was saved, skipped, cancelled or failed;
+- size offers, **Not now**, deletes and purges;
+- list buttons that failed, and why.
 
-When you type `/handoff`, the plugin writes the handoff in the background from a copy of the session, so it doesn't add a long reply to your conversation. It reads the session's record first (the files you read and changed, the skills and MCP servers you used, links, and the git state) and gives those to the writer to check against. If that fails, Claude writes it in a normal reply instead.
+It keeps the last 500 lines and never holds handoff text.
 
-## Size handoff
+```text
+2026-11-12 15:42:07  a1b2c3d4  start      size-auto · context 252k
+2026-11-12 15:42:20  a1b2c3d4  saved      786 words in 13 s → 2026-11-12-1542-plan-dry-run-flag.md
+```
 
-Long sessions run out of room: when the context fills up, Claude Code compacts the conversation, and a handoff written after that has less to work from. The size handoff catches it first. After each reply, when the context has passed the threshold, it either asks or writes one straight away. It's on by default at 80% of the point where this session compacts, asking first. That follows the model's window: about 775k on a 1M window, about 135k on a 200k one.
-
-| Command | Does |
-| --- | --- |
-| `/handoff at 80%` or `/handoff 80%` | Sets the threshold as a share of the point where the session compacts, worked out each reply (with auto-compact off, of the whole window), from 50% to 95%. 80% is the default |
-| `/handoff at 250k` or `/handoff 250k` | Sets a fixed threshold instead, in thousands of tokens (50k–900k). Also turns the size handoff on. A plain number, or one ending in `m`, is the idle wait in minutes |
-| `/handoff at off` | Turns the size handoff off |
-| `/handoff size ask` | When the threshold is passed, shows "Context at 252k. Write a handoff before it compacts?" with **Write handoff** and **Not now**. The default |
-| `/handoff size auto` | Writes the handoff as soon as the reply that passed the threshold ends |
-
-- It fires once per crossing. After it fires, or after **Not now**, it waits half the room left before compaction (at least 10k tokens), so it asks once more before the session compacts.
-- If the context drops back under the threshold (after `/compact` or `/clear`), it's ready to fire again.
-- It never fires while Claude is replying, only after a reply ends.
-- `size auto` makes a model call you didn't ask for each time it fires, which is why `ask` is the default.
-- The size and idle handoffs are separate: neither setting turns the other on or off.
-
-## Idle handoff
-
-Turn it on and a handoff is written by itself when you've been idle long enough that the session's prompt cache is about to expire, so the summary is written while the whole conversation is still cached. It's on by default; `/handoff off` turns it off.
-
-It's written in the background, like the size handoff: saved to `.claude/handoff/`, with the **Copy**, **Start new chat** and **Open file** buttons waiting above the prompt when you come back, and nothing added to the conversation. (Where the plugin's hooks module can't load, Claude writes it as a normal reply instead.) Like the size handoff, it skips a session with no real work in it, such as a single quick question.
-
-| Command | Does |
-| --- | --- |
-| `/handoff on` / `/handoff off` | Turns idle handoff on (the default) or off. On uses the wait you last chose, `auto` until you pick one |
-| `/handoff auto` | Turns it on and waits until about a minute before your cache expires: 4 minutes on a 5-minute cache, 59 on a 1-hour cache. Detected from the session; the default |
-| `/handoff 20` or `/handoff 20m` | Turns it on and waits 20 minutes instead (1–120) |
-| `/handoff awake on` / `/handoff awake off` | Keeps your Mac from going to sleep while a timer waits, so the handoff still happens. The screen still turns off and locks as usual (see below). Off by default; `awake on` also turns idle handoff on |
-| `/handoff sleep on` / `/handoff sleep off` | Hands off a few minutes before your Mac goes to sleep, if that comes before the wait runs out (see below). On by default; `sleep on` also turns idle handoff on |
-| `/handoff reset` or `/handoff default` | Puts every setting, idle and size, back to its default: idle handoff on (wait `auto`, before-sleep on, keep-awake off), size handoff on at 80%, asking first |
-| `/handoff settings` or `/handoff status` | Shows the current settings |
-| `/handoff help` or `/handoff h` | Lists every option, with your current settings |
-
-- It fires once per idle stretch. Your next message re-arms it.
-- Each idle handoff is a model call, so it uses tokens. On a 5-minute cache, with frequent short breaks, you may prefer it off or a longer wait.
-- It needs the session to stay open, and doesn't run in `claude -p`.
-- Each session times itself. Working in another session doesn't stop it.
-- **The settings apply to every session.** `/handoff 5` in one session sets a 5-minute wait in all of them, open ones included.
-- It runs a small bash script after each reply, so it needs macOS, Linux, or Windows with [Git Bash](https://git-scm.com/downloads/win). It hasn't been tested on Windows.
-- For a focus that is one of those words, quote it: `/handoff "settings"`, `/handoff "reset"`, `/handoff "list"`, `/handoff "purge"`.
-
-### Sleep and keep-awake
-
-> [!IMPORTANT]
-> **It can't wake a sleeping computer.** The handoff only happens while the computer is awake. If it sleeps while you're away (say, an hour at lunch) and the cache expires in the meantime, the idle handoff is skipped when the computer wakes, rather than re-reading the whole conversation at full price. Run `/handoff` yourself when you're back.
-
-Most Macs go to sleep a few minutes after the display turns off, which is often well before a 1-hour cache runs out. To keep idle handoff working while you step away, pick one:
-
-- **`/handoff sleep on`** (macOS, on by default). Hands off early instead of keeping the Mac awake. It reads your Mac's sleep timers and how long it's been since you last touched the keyboard or mouse, in any app, and hands off about 3 minutes before the Mac is due to sleep. The Mac then sleeps as usual. For example, with the display set to turn off after 30 minutes, an hour away gets its handoff at about minute 28, still cached.
-  - The timing is an estimate. If an app is keeping the Mac awake (playing audio, say), the handoff comes earlier than it needed to, which is still cheap.
-  - With `awake on` too, it only acts while keep-awake isn't holding the Mac awake, e.g. on battery.
-  - On Linux and Windows it does nothing.
-- **`/handoff awake on`** (macOS). While a timer is waiting, it keeps the Mac itself from going to sleep (not the screen: that still turns off) with macOS's built-in `caffeinate`, and lets go the moment the handoff fires or you type. Nothing to install.
-  - Only on power: on battery it lets the Mac sleep as usual, and unplugging mid-wait lets go within seconds.
-  - The display still turns off and locks as usual, and closing the lid still puts the Mac to sleep.
-  - On Linux and Windows it does nothing.
-- **System Settings › Battery › Options › Prevent automatic sleeping on power adapter when the display is off.** The Mac never idle-sleeps while plugged in, not just during the wait.
-- **`caffeinate -i -t 3900`** in a terminal tab before you step away keeps the Mac awake for 65 minutes.
+Nothing is added to `.gitignore`. To keep handoffs out of git, add `.claude/handoff/` to `.gitignore`, or to `.git/info/exclude` for just your clone.
 
 ## Good to know
 
-- **One file, nothing else.** Writing a handoff runs only read-only git commands (`status`, `log`, the current branch) and creates exactly one file, the handoff in `.claude/handoff/`. It never changes, stages or commits anything else.
-- **The buttons need the mod.** The size handoff, the band, its buttons and the `/handoff list` pane come from the plugin's hooks module, which needs Claude Code 2.1.311 or later. Where it doesn't load, `/handoff` still writes and saves the handoff as a normal reply.
-- **Settings file.** The idle and size handoff settings are saved in `~/.claude/handoff/`. Uninstalling the plugin leaves that folder behind; delete it if you want them gone.
+- **Requirements.**
+  - The buttons, the size handoff and the list pane need Claude Code 2.1.311 or later. On older versions, `/handoff` still writes and saves the handoff as a normal reply.
+  - Idle handoff runs a small bash script, so it needs macOS, Linux, or Windows with [Git Bash](https://git-scm.com/downloads/win). It hasn't been tested on Windows.
+- **One file, nothing else.** It runs only read-only git commands (`status`, `log`, the branch) and writes only the handoff file. It never changes, stages or commits anything.
+- **Kept out of your chat.** It writes the handoff in the background, checked against the files, skills and links the session used, so no long reply lands in the conversation.
 - **No secrets.** API keys, passwords and tokens become `<REDACTED>`, with a note on where the real value lives.
-- **Facts only.** Anything not confirmed working is marked "not verified" rather than reported as done.
+- **Facts only.** Anything not confirmed working is marked "not verified".
+- **Settings** live in `~/.claude/handoff/`. Uninstalling leaves that folder behind; delete it if you want them gone.
 
 ## Update and remove
 
