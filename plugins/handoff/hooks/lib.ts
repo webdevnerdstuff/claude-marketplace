@@ -65,7 +65,7 @@ export const SETTING = /^(help|h|status|settings|reset|default|on|off|auto|\d+[k
 /** `/handoff list`: this project's saved handoffs in a pane, each with Copy, Open and Start new chat. */
 export const LIST = /^list$/;
 
-/** A saved handoff's title, status and save time, from its file name and text. */
+/** A saved handoff's title, status and save time (12-hour clock), from its file name and text. */
 export function describeHandoff(name: string, text: string): HandoffEntry {
 	const title = /^#{1,2}\s*(?:Handoff:|✅\s*Complete:)\s*(.+)$/m.exec(text)?.[1]?.trim() ?? name;
 	const stamp = /^(\d{4}-\d{2}-\d{2})-(\d{2})(\d{2})-/.exec(name);
@@ -77,7 +77,12 @@ export function describeHandoff(name: string, text: string): HandoffEntry {
 				? 'In progress'
 				: '';
 
-	return { name, title, status, when: stamp ? `${stamp[1]} ${stamp[2]}:${stamp[3]}` : '' };
+	return { name, title, status, when: stamp ? `${stamp[1]} ${clock12(Number(stamp[2]), stamp[3] ?? '00')}` : '' };
+}
+
+/** An hour and minutes on a 12-hour clock, e.g. 14 and "09" → "2:09 PM". */
+function clock12(hour: number, minutes: string): string {
+	return `${hour % 12 || 12}:${minutes} ${hour < 12 ? 'AM' : 'PM'}`;
 }
 
 /**

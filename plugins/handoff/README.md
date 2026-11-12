@@ -44,7 +44,13 @@ Add the [marketplace](../../README.md#quick-start) if you haven't, then:
 /handoff just the auth migration # one thread of the work
 ```
 
-The handoff is saved to your project, and a band above the prompt offers:
+While it writes, a band above the prompt shows each step:
+
+<img alt="The handoff band while writing: five steps with progress bars, the fourth one running" src="../../docs/brand/screenshots/handoff-writing.svg" width="720">
+
+Then it's saved to your project, and the band offers:
+
+<img alt="The handoff band once saved: every step done, the saved file's path, and the Copy, Start new chat, Open file and Close buttons" src="../../docs/brand/screenshots/handoff-saved.svg" width="720">
 
 | Button | Does |
 | --- | --- |
@@ -168,7 +174,10 @@ Every handoff, whether typed, size or idle, is saved in the project:
 
 `<project>` is the git root, or the working folder outside a repo. The file name is the date, the time and the title.
 
-**`/handoff list`** opens a pane beside the chat, newest first.
+**`/handoff list`** opens a pane beside the chat, newest first:
+
+<img alt="The handoff list pane: four saved handoffs, each with its title, date and status and the Copy, Open file, Start new chat and Delete buttons, with Refresh at the top" src="../../docs/brand/screenshots/handoff-list.svg" width="470">
+
 - Each handoff shows its title, when it was saved and its status, with **Copy**, **Open file**, **Start new chat** and **Delete** (to the Trash).
 - **Refresh** picks up handoffs saved by other sessions or changed in Finder. Escape closes the pane.
 - It's how you reach an idle handoff later. Where a pane can't open, it prints a table instead.

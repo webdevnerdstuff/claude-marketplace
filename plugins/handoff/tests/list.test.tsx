@@ -9,8 +9,8 @@ import type { HandoffList } from '../types';
 const LIST: HandoffList = {
 	dir: '/repo/.claude/handoff',
 	entries: [
-		{ name: '2026-11-12-1409-b.md', title: 'Newer one', status: 'Complete', when: '2026-11-12 14:09' },
-		{ name: '2026-11-11-1200-a.md', title: 'Older one', status: 'In progress', when: '2026-11-11 12:00' },
+		{ name: '2026-11-12-1409-b.md', title: 'Newer one', status: 'Complete', when: '2026-11-12 2:09 PM' },
+		{ name: '2026-11-11-1200-a.md', title: 'Older one', status: 'In progress', when: '2026-11-11 12:00 PM' },
 	],
 	note: '',
 };
@@ -81,7 +81,7 @@ describe('the list pane', () => {
 					expect(await ui.find({ key: `${action}:${name}` })).toBeDefined();
 				}
 			}
-			expect(await ui.find({ type: 'Text', text: /2026-11-12 14:09 · Complete/ })).toBeDefined();
+			expect(await ui.find({ type: 'Text', text: /2026-11-12 2:09 PM · Complete/ })).toBeDefined();
 			expect(await ui.find({ key: 'refresh' })).toBeDefined();
 		});
 
