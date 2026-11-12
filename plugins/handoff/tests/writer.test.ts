@@ -247,8 +247,8 @@ describe('readHandoffs', () => {
 
 		expect(dir).toBe('/repo/.claude/handoff');
 		expect(entries).toEqual([
-			{ name: '2026-11-12-0905-b.md', title: 'Newer one', status: 'Complete', when: '2026-11-12 09:05' },
-			{ name: '2026-11-11-1200-a.md', title: 'Older one', status: 'In progress', when: '2026-11-11 12:00' },
+			{ name: '2026-11-12-0905-b.md', title: 'Newer one', status: 'Complete', when: '2026-11-12 9:05 AM' },
+			{ name: '2026-11-11-1200-a.md', title: 'Older one', status: 'In progress', when: '2026-11-11 12:00 PM' },
 		]);
 	});
 });

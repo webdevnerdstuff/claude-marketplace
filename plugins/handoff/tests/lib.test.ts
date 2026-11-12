@@ -489,8 +489,15 @@ describe('list', () => {
 			name: '2026-11-12-1409-x.md',
 			title: 'Size trigger',
 			status: 'In progress',
-			when: '2026-11-12 14:09',
+			when: '2026-11-12 2:09 PM',
 		});
+	});
+
+	test('shows the save time on a 12-hour clock', () => {
+		expect(describeHandoff('2026-11-12-0005-x.md', '').when).toBe('2026-11-12 12:05 AM');
+		expect(describeHandoff('2026-11-12-0930-x.md', '').when).toBe('2026-11-12 9:30 AM');
+		expect(describeHandoff('2026-11-12-1200-x.md', '').when).toBe('2026-11-12 12:00 PM');
+		expect(describeHandoff('2026-11-12-2359-x.md', '').when).toBe('2026-11-12 11:59 PM');
 	});
 
 	test('knows blocked and complete handoffs', () => {
@@ -504,10 +511,10 @@ describe('list', () => {
 	});
 
 	test('the chat table never opens on its first line, where the app puts "handoff: "', () => {
-		const text = listTable([{ name: 'a.md', title: 'A | pipe', status: 'Complete', when: '2026-11-12 14:09' }]);
+		const text = listTable([{ name: 'a.md', title: 'A | pipe', status: 'Complete', when: '2026-11-12 2:09 PM' }]);
 		const lines = text.split('\n');
 		expect(lines[0]?.startsWith('|')).toBe(false);
-		expect(lines).toContain('| 2026-11-12 14:09 | A \\| pipe | Complete | `a.md` |');
+		expect(lines).toContain('| 2026-11-12 2:09 PM | A \\| pipe | Complete | `a.md` |');
 	});
 });
 
