@@ -17,7 +17,8 @@ concurrency:
 
 jobs:
   check:
-    name: check (claude ${{ matrix.claude }})
+    # The pinned build's name carries no version, so main's required check stays the same when the pin moves.
+    name: check (${{ matrix.claude == 'latest' && 'latest' || 'pinned' }})
     runs-on: ubuntu-latest
     # The latest build may change the plugin format before the plugins catch up: it reports, it
     # does not block.
