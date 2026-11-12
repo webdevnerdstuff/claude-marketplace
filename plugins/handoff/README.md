@@ -191,7 +191,7 @@ Most Macs go to sleep a few minutes after the display turns off, which is often 
 ## Good to know
 
 - **One file, nothing else.** Writing a handoff runs only read-only git commands (`status`, `log`, the current branch) and creates exactly one file, the handoff in `.claude/handoff/`. It never changes, stages or commits anything else.
-- **The buttons need the mod.** The size handoff, the band and its buttons come from the plugin's hooks module. Where it doesn't load, `/handoff` still writes and saves the handoff as a normal reply.
+- **The buttons need the mod.** The size handoff, the band, its buttons and the `/handoff list` pane come from the plugin's hooks module, which needs Claude Code 2.1.311 or later. Where it doesn't load, `/handoff` still writes and saves the handoff as a normal reply.
 - **Settings file.** The idle and size handoff settings are saved in `~/.claude/handoff/`. Uninstalling the plugin leaves that folder behind; delete it if you want them gone.
 - **No secrets.** API keys, passwords and tokens become `<REDACTED>`, with a note on where the real value lives.
 - **Facts only.** Anything not confirmed working is marked "not verified" rather than reported as done.

@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        claude: ['2.1.287', latest]
+        claude: ['2.1.311', latest]
     steps:
       - uses: actions/checkout@v4
 
