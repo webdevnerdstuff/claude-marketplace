@@ -1,6 +1,6 @@
 import type { EngineInterface, Register } from 'claude-code'
 
-import { LIST, PURGE, SETTING, armCheck, armFrom, bar, compactPoint, chatBlock, ringLoader, freshSteps, idleTimerEnv, listTable, newChatUrl, scriptArgs, shortReason, sizeThreshold, writeProgress } from './lib'
+import { LIST, PURGE, SETTING, armCheck, armFrom, bar, compactPoint, chatBlock, ringLoader, freshSteps, idleTimerEnv, listTable, newSessionUrl, scriptArgs, shortReason, sizeThreshold, writeProgress } from './lib'
 import { listHandoffs, readHandoffs, readSize, trashFiles, writeHandoff, writeLog } from './writer'
 import type { Panel } from './writer'
 import type { HandoffList, Step } from '../types'
@@ -163,7 +163,7 @@ async function entryFailed($: EngineInterface, path: string, action: 'copy' | 's
 	await writeLog($, 'failed', `${action} ${path.split('/').pop()}: ${reason}`)
 }
 
-// Reads one row's file for Copy or Start new chat; undefined, with the failure noted and logged, when it can't.
+// Reads one row's file for Copy or New session; undefined, with the failure noted and logged, when it can't.
 async function readEntry($: EngineInterface, path: string, title: string, action: 'copy' | 'start') {
 	let text = ''
 	let reason = ''
@@ -196,7 +196,7 @@ async function copyEntry($: EngineInterface, path: string, title: string, surfac
 	const code = copied.isCopied ? 0 : (await $.process.spawn({ argv: ['pbcopy'], input: text }).result.catch(() => ({ code: 1 }))).code
 
 	if (code === 0) {
-		await listNote($, `Copied "${title}". Paste it as the first message of a new chat.`)
+		await listNote($, `Copied "${title}". Paste it as the first message of a new session.`)
 
 		return
 	}
@@ -206,7 +206,7 @@ async function copyEntry($: EngineInterface, path: string, title: string, surfac
 	await entryFailed($, path, 'copy', `Copy failed for "${title}": ${reason}. Use Open file instead.`, reason)
 }
 
-// Start new chat for one row: the new chat opening is the answer; a note only when it doesn't.
+// New session for one row: the new session opening is the answer; a note only when it doesn't.
 async function startEntry($: EngineInterface, path: string, title: string) {
 	const text = await readEntry($, path, title, 'start')
 
@@ -217,14 +217,14 @@ async function startEntry($: EngineInterface, path: string, title: string) {
 	let reason = ''
 
 	try {
-		const opened = await $.process.run(['open', newChatUrl(text, path)])
+		const opened = await $.process.run(['open', newSessionUrl(text, path)])
 		reason = opened.exitCode === 0 ? '' : shortReason(opened.stderr) || `open exited ${opened.exitCode}`
 	} catch (error) {
 		reason = shortReason(error) || 'open failed'
 	}
 
 	if (reason) {
-		await entryFailed($, path, 'start', `The new chat did not open for "${title}": ${reason}. Copy it instead.`, reason)
+		await entryFailed($, path, 'start', `The new session did not open for "${title}": ${reason}. Copy it instead.`, reason)
 
 		return
 	}
@@ -425,7 +425,7 @@ async function copy($: EngineInterface, surface: Parameters<EngineInterface['ui'
 	const copied = await $.ui.copy({ text: panel.text, surface }).catch(() => ({ isCopied: false }))
 
 	if (copied.isCopied) {
-		await note($, 'Copied. Paste it as the first message of a new chat.')
+		await note($, 'Copied. Paste it as the first message of a new session.')
 
 		return
 	}
@@ -433,7 +433,7 @@ async function copy($: EngineInterface, surface: Parameters<EngineInterface['ui'
 	const pbcopy = $.process.spawn({ argv: ['pbcopy'], input: panel.text })
 	const done = await pbcopy.result.catch(() => ({ code: 1 }))
 
-	await note($, done.code === 0 ? 'Copied. Paste it as the first message of a new chat.' : 'Copy failed. Use Open file instead.')
+	await note($, done.code === 0 ? 'Copied. Paste it as the first message of a new session.' : 'Copy failed. Use Open file instead.')
 }
 
 async function startNew($: EngineInterface) {
@@ -443,10 +443,10 @@ async function startNew($: EngineInterface) {
 		return
 	}
 
-	const opened = await $.process.run(['open', newChatUrl(panel.text, panel.path)]).catch(() => undefined)
+	const opened = await $.process.run(['open', newSessionUrl(panel.text, panel.path)]).catch(() => undefined)
 
-	// The new chat opening is the answer; a note only says when it didn't.
-	await note($, opened?.exitCode === 0 ? '' : 'The new chat did not open. Copy it instead.')
+	// The new session opening is the answer; a note only says when it didn't.
+	await note($, opened?.exitCode === 0 ? '' : 'The new session did not open. Copy it instead.')
 }
 
 export const register: Register = on => {
@@ -703,14 +703,14 @@ export const register: Register = on => {
 									onPress={press => void copyEntry($, path, entry.title, press.surface).catch(() => undefined)}
 								/>
 								<Button
+									key={`start:${entry.name}`}
+									label="New session"
+									onPress={() => void startEntry($, path, entry.title).catch(() => undefined)}
+								/>
+								<Button
 									key={`open:${entry.name}`}
 									label="Open file"
 									onPress={() => void $.process.run(['open', path]).catch(() => undefined)}
-								/>
-								<Button
-									key={`start:${entry.name}`}
-									label="Start new chat"
-									onPress={() => void startEntry($, path, entry.title).catch(() => undefined)}
 								/>
 								<Button
 									key={`trash:${entry.name}`}
@@ -772,7 +772,7 @@ export const register: Register = on => {
 					<Text dimColor wrap="truncate-middle">{`Saved to ${panel.file}`}</Text>
 					<Box flexDirection="row" gap={1}>
 						<Button key="copy" label="Copy" variant="primary" onPress={noop} />
-						<Button key="start" label="Start new chat" variant="secondary" onPress={noop} />
+						<Button key="start" label="New session" variant="secondary" onPress={noop} />
 						<Button key="open" label="Open file" onPress={noop} />
 						<Button key="close" label="Close" role="dismiss" onPress={noop} />
 					</Box>

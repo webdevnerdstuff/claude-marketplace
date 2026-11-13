@@ -410,7 +410,7 @@ Command	What it does
 `/handoff at <N>k` (or `<N>k`)	size handoff at a fixed N thousand tokens instead (50-900)
 `/handoff at off`	size handoff off
 `/handoff size ask/auto`	ask with a button first (the default), or write it straight away
-`/handoff list`	this project's saved handoffs, newest first, each with Copy, Open file and Start new chat
+`/handoff list`	this project's saved handoffs, newest first, each with Copy, New session and Open file
 `/handoff purge`	move this project's saved handoffs (.claude/handoff/*.md) to the Trash, after you confirm
 `/handoff reset` (or `default`)	every setting back to its default: idle handoff on (wait auto, before-sleep on, keep-awake off), size handoff at 80%, ask
 `/handoff settings` (or `status`)	what everything is set to

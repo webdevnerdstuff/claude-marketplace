@@ -50,12 +50,12 @@ While it writes, a band above the prompt shows each step:
 
 Then it's saved to your project, and the band offers:
 
-<img alt="The handoff band once saved: every step done, the saved file's path, and the Copy, Start new chat, Open file and Close buttons" src="../../docs/brand/screenshots/handoff-saved.svg" width="720">
+<img alt="The handoff band once saved: every step done, the saved file's path, and the Copy, New session, Open file and Close buttons" src="../../docs/brand/screenshots/handoff-saved.svg" width="720">
 
 | Button | Does |
 | --- | --- |
-| **Copy** | Copies it, ready to paste into a new chat |
-| **Start new chat** | Opens a new chat in the Claude desktop app with it filled in; press Return to start |
+| **Copy** | Copies it, ready to paste into a new session |
+| **New session** | Opens a new session in the Claude desktop app with it filled in; press Return to start |
 | **Open file** | Opens the saved file |
 | **Close** | Hides the band |
 
@@ -176,9 +176,9 @@ Every handoff, whether typed, size or idle, is saved in the project:
 
 **`/handoff list`** opens a pane beside the chat, newest first:
 
-<img alt="The handoff list pane: four saved handoffs, each with its title, date and status and the Copy, Open file, Start new chat and Delete buttons, with Refresh at the top" src="../../docs/brand/screenshots/handoff-list.svg" width="470">
+<img alt="The handoff list pane: four saved handoffs, each with its title, date and status and the Copy, New session, Open file and Delete buttons, with Refresh at the top" src="../../docs/brand/screenshots/handoff-list.svg" width="470">
 
-- Each handoff shows its title, when it was saved and its status, with **Copy**, **Open file**, **Start new chat** and **Delete** (to the Trash).
+- Each handoff shows its title, when it was saved and its status, with **Copy**, **New session**, **Open file** and **Delete** (to the Trash).
 - **Refresh** picks up handoffs saved by other sessions or changed in Finder. Escape closes the pane.
 - It's how you reach an idle handoff later. Where a pane can't open, it prints a table instead.
 

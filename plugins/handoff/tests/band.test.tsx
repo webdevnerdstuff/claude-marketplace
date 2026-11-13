@@ -212,7 +212,7 @@ describe('the band', () => {
 		});
 
 		test(`${surface}: a note sits a line below the buttons`, async ($, on) => {
-			world(on, panelOf('ready', { note: 'Copied. Paste it as the first message of a new chat.' }));
+			world(on, panelOf('ready', { note: 'Copied. Paste it as the first message of a new session.' }));
 
 			const ui = await mount($, surface);
 			const band = (await ui.find({ key: 'handoff-band' })) as { props: Record<string, unknown> } | undefined;
@@ -269,8 +269,8 @@ describe('the band', () => {
 		expect(held.panel).toBe(null);
 	});
 
-	test('Start new chat opens the chat and adds no note when it works', async ($, on) => {
-		const held = world(on, panelOf('ready', { note: 'Copied. Paste it as the first message of a new chat.' }));
+	test('New session opens the session and adds no note when it works', async ($, on) => {
+		const held = world(on, panelOf('ready', { note: 'Copied. Paste it as the first message of a new session.' }));
 		const runs: (readonly string[])[] = [];
 		on('process.run', ($, e) => {
 			runs.push(e.argv);
@@ -282,12 +282,12 @@ describe('the band', () => {
 		await ui.press({ key: 'start' });
 
 		expect(runs[0]?.[0]).toBe('open');
-		// The project the handoff was saved in, so the new chat opens there and not in the app's default folder.
+		// The project the handoff was saved in, so the new session opens there and not in the app's default folder.
 		expect(String(runs[0]?.[1])).toMatch(/^claude:\/\/code\/new\?q=.+&folder=%2Frepo$/);
 		expect(held.panel?.note).toBe('');
 	});
 
-	test('Start new chat says so when the chat does not open', async ($, on) => {
+	test('New session says so when the session does not open', async ($, on) => {
 		const held = world(on, panelOf('ready'));
 		on('process.run', () => ({ value: { exitCode: 1, stdout: '', stderr: 'no handler' } }) as never);
 
