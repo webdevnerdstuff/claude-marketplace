@@ -24,10 +24,10 @@ export type Panel = {
 	file: string
 	/** The saved file's absolute path, for Open file. */
 	path: string
-	/** The handoff itself, for Copy and Start new chat. */
+	/** The handoff itself, for Copy and New session. */
 	text: string
 	error: string
-	/** A line under the buttons: "Copied", "A new chat is filled in". */
+	/** A line under the buttons: "Copied", "A new session is filled in". */
 	note: string
 	/** purge: the absolute paths listed when /handoff purge ran; only these are moved to the Trash. */
 	files?: string[]

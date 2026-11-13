@@ -62,7 +62,7 @@ export type Facts = { files: string[]; skills: string[]; links: string[]; git: s
 /** `/handoff`'s settings words, answered by idle.sh; anything else is a focus. */
 export const SETTING = /^(help|h|status|settings|reset|default|on|off|auto|\d+[km]?|(awake|sleep) (on|off)|\d+%|at (\d+k?|\d+%|off)|size (ask|auto))$/;
 
-/** `/handoff list`: this project's saved handoffs in a pane, each with Copy, Open and Start new chat. */
+/** `/handoff list`: this project's saved handoffs in a pane, each with Copy, New session and Open. */
 export const LIST = /^list$/;
 
 /** A saved handoff's title, status and save time (12-hour clock), from its file name and text. */
@@ -448,11 +448,11 @@ export function shortReason(error: unknown): string {
 }
 
 /**
- * The desktop app's link for a new Claude Code chat with the handoff filled in. `folder` is the
+ * The desktop app's link for a new Claude Code session with the handoff filled in. `folder` is the
  * project the handoff was saved in (the path before `/.claude/handoff/`); without it the app opens
- * the chat in whichever folder it used last.
+ * the session in whichever folder it used last.
  */
-export function newChatUrl(text: string, path: string): string {
+export function newSessionUrl(text: string, path: string): string {
 	const at = path.lastIndexOf('/.claude/handoff/');
 	const folder = at > 0 ? `&folder=${encodeURIComponent(path.slice(0, at))}` : '';
 

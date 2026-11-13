@@ -69,7 +69,7 @@ const mount = ($: Engine, surface: 'terminal' | 'desktop') =>
 
 describe('the list pane', () => {
 	for (const surface of ['terminal', 'desktop'] as const) {
-		test(`${surface}: one row per handoff, newest first, each with Copy, Open, Start new chat and Delete`, async ($, on) => {
+		test(`${surface}: one row per handoff, newest first, each with Copy, New session, Open and Delete`, async ($, on) => {
 			world(on, LIST);
 
 			const ui = await mount($, surface);
@@ -119,7 +119,7 @@ describe('the list pane', () => {
 		expect(held.list?.note).toContain('Copied');
 	});
 
-	test('Open and Start new chat act on their own row', async ($, on) => {
+	test('New session and Open act on their own row', async ($, on) => {
 		const held = world(on, LIST);
 
 		const ui = await mount($, 'desktop');
@@ -210,7 +210,7 @@ describe('the list pane', () => {
 		expect(note?.props.color).toBe('#16a34a');
 	});
 
-	test('Start new chat that does not open marks its note a failure', async ($, on) => {
+	test('New session that does not open marks its note a failure', async ($, on) => {
 		const held = world(on, LIST, { openExit: 1 });
 
 		const ui = await mount($, 'desktop');
@@ -254,13 +254,13 @@ describe('the list pane', () => {
 		expect(log?.text).toMatch(/failed\s+copy 2026-11-12-1409-b\.md: \S.*\n$/);
 	});
 
-	test('a Start new chat that does not open says why and logs it', async ($, on) => {
+	test('a New session that does not open says why and logs it', async ($, on) => {
 		const held = world(on, LIST, { openExit: 1 });
 
 		const ui = await mount($, 'desktop');
 		await ui.press({ key: 'start:2026-11-12-1409-b.md' });
 
-		expect(held.list?.note).toBe('The new chat did not open for "Newer one": open exited 1. Copy it instead.');
+		expect(held.list?.note).toBe('The new session did not open for "Newer one": open exited 1. Copy it instead.');
 		const log = held.writes.find((write) => write.path.endsWith('handoff.log'));
 		expect(log?.text).toMatch(/failed\s+start 2026-11-12-1409-b\.md: open exited 1\n$/);
 	});
