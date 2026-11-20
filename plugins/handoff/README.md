@@ -213,6 +213,10 @@ Nothing is added to `.gitignore`. To keep handoffs out of git, add `.claude/hand
 
 See [Update and remove](../../README.md#update-and-remove) in the marketplace README.
 
+## Credits
+
+Thanks to [Ben AI](https://www.youtube.com/@BenAI92). The handoff mod shown in [9 Insane Claude Mods I Already Can't Live Without](https://www.youtube.com/watch?v=bTqizdva04g) gave me ideas that made this plugin better.
+
 ## License
 
 MIT © WebDevNerdStuff
