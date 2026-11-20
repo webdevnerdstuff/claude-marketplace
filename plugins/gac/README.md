@@ -68,7 +68,7 @@ With nothing after the command, it reads `git status` and the diff, picks the fi
 3. **Commit**: stages the files and commits, loading nvm first so Husky hooks run.
 4. **Push** (`p`): `git push -u origin <branch>`.
 5. **PR** (`pp`): opens a PR into the repo's default branch.
-6. **Merge** (`m`): asks you once, waits for CI, merges with a merge commit, deletes the branch, then switches to the default branch and pulls.
+6. **Merge** (`m`): asks you once, waits for CI, merges with a merge commit (the branch is kept, locally and on the remote), then switches to the default branch and pulls.
 7. **Release** (`r`): tags the merge and publishes the release.
 
 It stops at the first step that fails and shows you why.

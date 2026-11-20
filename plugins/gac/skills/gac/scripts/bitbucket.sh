@@ -14,10 +14,11 @@
 #   setup                     prompts for your Atlassian email (blank for an access token)
 #                             and the token (hidden), and saves them
 #   default-branch            the repo's main branch
-#   pr-create <base> <title> [body]   open a PR from the current branch; prints "<number> <url>"
+#   pr-create <base> <title> [body]   open a PR from the current branch (the branch is left
+#                             open: not marked to close on merge); prints "<number> <url>"
 #   pr-checks <number>        success | pending | failure | none  (none = no builds reported)
 #   pr-approvals <number>     how many reviewers approved the PR
-#   pr-merge <number>         merge commit + delete the branch; prints "merged"
+#   pr-merge <number>         merge commit, keeping the branch; prints "merged"
 set -euo pipefail
 
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/remote.sh"
@@ -61,7 +62,7 @@ case "$cmd" in
     base=${1:?base}; title=${2:?title}; body=${3:-}
     head=$(git branch --show-current)
     api POST "/repositories/$SLUG/pullrequests" "$(jq -n --arg b "$base" --arg h "$head" --arg t "$title" --arg d "$body" \
-      '{title:$t, description:$d, source:{branch:{name:$h}}, destination:{branch:{name:$b}}, close_source_branch:true}')" \
+      '{title:$t, description:$d, source:{branch:{name:$h}}, destination:{branch:{name:$b}}}')" \
       | jq -r '"\(.id) \(.links.html.href)"' ;;
 
   pr-checks)
@@ -79,7 +80,7 @@ case "$cmd" in
 
   pr-merge)
     n=${1:?number}
-    api POST "/repositories/$SLUG/pullrequests/$n/merge" '{"merge_strategy":"merge_commit","close_source_branch":true}' >/dev/null
+    api POST "/repositories/$SLUG/pullrequests/$n/merge" '{"merge_strategy":"merge_commit","close_source_branch":false}' >/dev/null
     # A large merge can finish in the background; give it a moment before reporting.
     for _ in 1 2 3 4 5 6; do
       state=$(api GET "/repositories/$SLUG/pullrequests/$n" | jq -r '.state')

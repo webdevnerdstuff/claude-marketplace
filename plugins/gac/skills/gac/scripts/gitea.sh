@@ -14,7 +14,7 @@
 #   pr-create <base> <title> [body]   open a PR from the current branch; prints "<number> <url>"
 #   pr-checks <number>        success | pending | failure | error | none  (none = no CI)
 #   pr-approvals <number>     how many reviewers approved the PR
-#   pr-merge <number>         merge commit + delete the branch; prints "merged"
+#   pr-merge <number>         merge commit, keeping the branch; prints "merged"
 #   release-create <tag> <target> <title> [body]
 #                             tag <target> (a branch or SHA) and publish a release; prints its URL
 set -euo pipefail
@@ -78,7 +78,7 @@ case "$cmd" in
 
   pr-merge)
     n=${1:?number}
-    api POST "/repos/$SLUG/pulls/$n/merge" '{"Do":"merge","delete_branch_after_merge":true}' >/dev/null
+    api POST "/repos/$SLUG/pulls/$n/merge" '{"Do":"merge","delete_branch_after_merge":false}' >/dev/null
     api GET "/repos/$SLUG/pulls/$n" | jq -r 'if .merged then "merged" else "not merged" end' ;;
 
   release-create)

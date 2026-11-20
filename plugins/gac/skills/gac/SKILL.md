@@ -52,7 +52,7 @@ failure and reporting it:
 | `gac` | commit |
 | `gacp` | commit, push (`git push -u origin <branch>`) |
 | `gacpp` | commit, push, open a PR into the repo's default branch |
-| `gacppm` | commit, push, open a PR, **ask the user once to confirm the merge** (see **Merging** below), wait for CI to pass, merge it (a merge commit, deleting the branch), then fast-forward local main |
+| `gacppm` | commit, push, open a PR, **ask the user once to confirm the merge** (see **Merging** below), wait for CI to pass, merge it (a merge commit, keeping the branch), then fast-forward local main |
 | `gacppmr` | everything `gacppm` does, then tag the merge and publish a release (see **Release** below). On Bitbucket, which has no releases, it runs as `gacppm` |
 
 ### Merging (`gacppm` and `gacppmr`)
@@ -80,7 +80,7 @@ The shorthand authorizes getting the PR ready, not the merge itself. Ask the use
    - all checks passed: merge right away;
    - a check failed: don't merge; show the failure and the PR link and stop (no
      release either).
-4. Merge with `gh pr merge <number> --merge --delete-branch` on GitHub, or
+4. Merge with `gh pr merge <number> --merge` on GitHub, or
    `pr-merge <number>` elsewhere. On GitHub, a PR can read `BLOCKED` while required
    checks are still running; that's not a refusal, keep waiting for CI. If the merge
    itself is refused after CI passed (branch protection, a required check that never
@@ -154,7 +154,7 @@ Before any PR step (and before the release check for `gacppmr`), find the host (
 ${CLAUDE_SKILL_DIR}/scripts/detect-host.sh
 ```
 
-- `github`: use `gh`.
+- `github`: use `gh`. Open the PR with `gh pr create --base <default> --title "<title>" --body "<body>"`.
 - `bitbucket` (Bitbucket Cloud): use `${CLAUDE_SKILL_DIR}/scripts/bitbucket.sh`; `gh`
   doesn't work there. Commands: `default-branch`, `pr-create <base> "<title>" "<body>"`
   → `<number> <url>`, `pr-checks <number>`, `pr-approvals <number>`, `pr-merge <number>`.
@@ -171,13 +171,18 @@ ${CLAUDE_SKILL_DIR}/scripts/detect-host.sh
   (it prompts for the token, hidden). If it isn't Forgejo/Gitea either, say PR steps
   aren't supported for that host and stop after the push.
 
+Never delete or close the PR's branch, on any host: not when opening the PR (no "close
+source branch" option, no auto-merge, no repo setting change) and not when merging it
+(no `--delete-branch`, `close_source_branch` or `delete_branch_after_merge`). The branch
+stays, locally and on the remote.
+
 The scripts read the host and repo from `origin`, settings from `~/.config/gac/hosts.json`
 and tokens from the macOS Keychain; nothing about a particular server is hard-coded. They
 need macOS, `curl` and `jq`. Never put a token on a command line or in a file yourself.
 
 `pr-checks` prints `success` / `pending` / `failure` / `error` / `none`. `none` means the
 repo has no CI, which counts as passing. After a merge, run
-`git switch <default> && git pull --ff-only && git fetch --prune && git branch -d <branch>`.
+`git switch <default> && git pull --ff-only`. Leave the branch in place, locally and on the remote.
 
 If a script reports HTTP 401/403, the token is missing a permission (write access to
 repositories and pull requests): say so and stop.
